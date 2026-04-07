@@ -77,8 +77,10 @@ export default async function ProtectedPage() {
                         </div>
 
                         <ProfileForm
-                            initialDisplayName={profile?.display_name ?? ''}
-                            initialTimezone={profile?.timezone ?? 'UTC'}
+                            initialProfile={{
+                                displayName: profile?.display_name ?? null,
+                                timezone: profile?.timezone ?? 'UTC',
+                            }}
                         />
                     </div>
                 </section>

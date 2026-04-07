@@ -1,62 +1,101 @@
 'use client'
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { ApiClientError, apiFetch } from '@/lib/api'
 
-type ProfileResponse = {
-    profile: {
-        displayName: string | null
-        timezone: string
-    }
+type EditableProfile = {
+    displayName: string | null
+    timezone: string
 }
 
 type ProfileFormProps = {
-    initialDisplayName: string
-    initialTimezone: string
+    initialProfile: EditableProfile
 }
 
-export function ProfileForm({
-    initialDisplayName,
-    initialTimezone,
-}: ProfileFormProps) {
-    const [displayName, setDisplayName] = useState(initialDisplayName)
-    const [timezone, setTimezone] = useState(initialTimezone)
+type ProfileResponse = {
+    profile: EditableProfile
+}
+
+const profileQueryKey = ['profile'] as const
+
+async function fetchProfile() {
+    const payload = await apiFetch<ProfileResponse>('/api/v1/profile')
+
+    if (!payload.data?.profile) {
+        throw new ApiClientError('Failed to load profile', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data.profile
+}
+
+async function updateProfile(profile: EditableProfile) {
+    const payload = await apiFetch<ProfileResponse>('/api/v1/profile', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+    })
+
+    if (!payload.data?.profile) {
+        throw new ApiClientError('Failed to save profile', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return {
+        message: payload.message,
+        profile: payload.data.profile,
+    }
+}
+
+export function ProfileForm({ initialProfile }: ProfileFormProps) {
+    const queryClient = useQueryClient()
     const [message, setMessage] = useState<string | null>(null)
-    const [isSaving, setIsSaving] = useState(false)
+    const [displayName, setDisplayName] = useState(
+        initialProfile.displayName ?? '',
+    )
+    const [timezone, setTimezone] = useState(initialProfile.timezone)
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        setIsSaving(true)
-        setMessage(null)
+    useQuery({
+        queryKey: profileQueryKey,
+        queryFn: fetchProfile,
+        initialData: initialProfile,
+    })
 
-        try {
-            const payload = await apiFetch<ProfileResponse>('/api/v1/profile', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ displayName, timezone }),
-            })
-
-            if (!payload.data?.profile) {
-                setMessage('Failed to save profile')
-                return
-            }
-
-            setDisplayName(payload.data.profile.displayName ?? '')
-            setTimezone(payload.data.profile.timezone)
-            setMessage(payload.message)
-        } catch (error) {
+    const saveProfileMutation = useMutation({
+        mutationFn: updateProfile,
+        onSuccess: async ({ message: successMessage, profile }) => {
+            queryClient.setQueryData(profileQueryKey, profile)
+            setDisplayName(profile.displayName ?? '')
+            setTimezone(profile.timezone)
+            setMessage(successMessage)
+            await queryClient.invalidateQueries({ queryKey: profileQueryKey })
+        },
+        onError: (error) => {
             if (error instanceof ApiClientError) {
                 setMessage(error.message)
                 return
             }
 
             setMessage('Failed to save profile')
-        } finally {
-            setIsSaving(false)
-        }
+        },
+    })
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setMessage(null)
+
+        await saveProfileMutation.mutateAsync({
+            displayName,
+            timezone,
+        })
     }
 
     return (
@@ -72,6 +111,7 @@ export function ProfileForm({
                         onChange={(event) => setDisplayName(event.target.value)}
                         maxLength={80}
                         placeholder="How should we call you?"
+                        disabled={saveProfileMutation.isPending}
                     />
                 </label>
 
@@ -85,6 +125,7 @@ export function ProfileForm({
                         onChange={(event) => setTimezone(event.target.value)}
                         placeholder="Asia/Jakarta"
                         required
+                        disabled={saveProfileMutation.isPending}
                     />
                 </label>
             </div>
@@ -92,9 +133,9 @@ export function ProfileForm({
             <button
                 className="rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
                 type="submit"
-                disabled={isSaving}
+                disabled={saveProfileMutation.isPending}
             >
-                {isSaving ? 'Saving...' : 'Save profile'}
+                {saveProfileMutation.isPending ? 'Saving...' : 'Save profile'}
             </button>
 
             {message ? (
