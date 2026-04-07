@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server'
-
 import {
     getServerAuth,
     serviceUnavailableJson,
     unauthorizedJson,
 } from '@/lib/auth'
+import { apiError, apiSuccess } from '@/lib/api'
 
 function parseProfileBody(body: unknown) {
     if (!body || typeof body !== 'object') {
@@ -63,21 +62,21 @@ export async function GET() {
         .single()
 
     if (error) {
-        return NextResponse.json(
-            { error: 'Failed to load profile' },
-            { status: 500 },
-        )
+        return apiError('Failed to load profile', { status: 500 })
     }
 
-    return NextResponse.json({
-        profile: {
-            id: data.id,
-            displayName: data.display_name,
-            timezone: data.timezone,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
+    return apiSuccess(
+        {
+            profile: {
+                id: data.id,
+                displayName: data.display_name,
+                timezone: data.timezone,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at,
+            },
         },
-    })
+        'Profile loaded',
+    )
 }
 
 export async function PATCH(request: Request) {
@@ -91,10 +90,18 @@ export async function PATCH(request: Request) {
         return unauthorizedJson()
     }
 
-    const parsed = parseProfileBody(await request.json())
+    let body: unknown
 
-    if ('error' in parsed) {
-        return NextResponse.json({ error: parsed.error }, { status: 400 })
+    try {
+        body = await request.json()
+    } catch {
+        return apiError('Invalid JSON body', { status: 400 })
+    }
+
+    const parsed = parseProfileBody(body)
+
+    if ('error' in parsed && typeof parsed.error === 'string') {
+        return apiError(parsed.error, { status: 400 })
     }
 
     const { data, error } = await supabase
@@ -105,19 +112,19 @@ export async function PATCH(request: Request) {
         .single()
 
     if (error) {
-        return NextResponse.json(
-            { error: 'Failed to update profile' },
-            { status: 500 },
-        )
+        return apiError('Failed to update profile', { status: 500 })
     }
 
-    return NextResponse.json({
-        profile: {
-            id: data.id,
-            displayName: data.display_name,
-            timezone: data.timezone,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
+    return apiSuccess(
+        {
+            profile: {
+                id: data.id,
+                displayName: data.display_name,
+                timezone: data.timezone,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at,
+            },
         },
-    })
+        'Profile updated',
+    )
 }

@@ -1,6 +1,7 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { unauthorized } from 'next/navigation'
 
+import { apiError } from '@/lib/api'
 import { hasSupabaseEnv } from '@/lib/supabase/env'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -111,12 +112,9 @@ export async function requireUser() {
 }
 
 export function unauthorizedJson() {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    return apiError('Unauthorized', { status: 401 })
 }
 
 export function serviceUnavailableJson() {
-    return Response.json(
-        { error: 'Supabase env is not configured' },
-        { status: 503 },
-    )
+    return apiError('Supabase env is not configured', { status: 503 })
 }

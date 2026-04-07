@@ -2,6 +2,15 @@
 
 import { useState } from 'react'
 
+import { ApiClientError, apiFetch } from '@/lib/api'
+
+type ProfileResponse = {
+    profile: {
+        displayName: string | null
+        timezone: string
+    }
+}
+
 type ProfileFormProps = {
     initialDisplayName: string
     initialTimezone: string
@@ -21,32 +30,33 @@ export function ProfileForm({
         setIsSaving(true)
         setMessage(null)
 
-        const response = await fetch('/api/v1/profile', {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ displayName, timezone }),
-        })
+        try {
+            const payload = await apiFetch<ProfileResponse>('/api/v1/profile', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ displayName, timezone }),
+            })
 
-        const payload = (await response.json()) as {
-            error?: string
-            profile?: {
-                displayName: string | null
-                timezone: string
+            if (!payload.data?.profile) {
+                setMessage('Failed to save profile')
+                return
             }
+
+            setDisplayName(payload.data.profile.displayName ?? '')
+            setTimezone(payload.data.profile.timezone)
+            setMessage(payload.message)
+        } catch (error) {
+            if (error instanceof ApiClientError) {
+                setMessage(error.message)
+                return
+            }
+
+            setMessage('Failed to save profile')
+        } finally {
+            setIsSaving(false)
         }
-
-        setIsSaving(false)
-
-        if (!response.ok || !payload.profile) {
-            setMessage(payload.error ?? 'Failed to save profile')
-            return
-        }
-
-        setDisplayName(payload.profile.displayName ?? '')
-        setTimezone(payload.profile.timezone)
-        setMessage('Profile saved.')
     }
 
     return (
