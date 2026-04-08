@@ -1,14 +1,66 @@
+export type ApiErrorCode =
+    | 'BAD_REQUEST'
+    | 'UNAUTHORIZED'
+    | 'FORBIDDEN'
+    | 'NOT_FOUND'
+    | 'CONFLICT'
+    | 'RATE_LIMITED'
+    | 'UPSTREAM_UNAVAILABLE'
+    | 'SERVICE_UNAVAILABLE'
+    | 'INTERNAL_ERROR'
+
 export type ApiResponse<T> = {
+    requestId: string
     message: string
     data: T | null
+    error?: {
+        code: ApiErrorCode | string
+        details?: unknown
+    }
 }
 
-export function apiSuccess<T>(data: T, message = 'OK', init?: ResponseInit) {
-    return Response.json({ message, data }, init)
+type ApiResponseOptions = ResponseInit & {
+    requestId?: string
+    code?: ApiErrorCode | string
+    details?: unknown
 }
 
-export function apiError(message: string, init?: ResponseInit) {
-    return Response.json({ message, data: null }, init)
+export function createRequestId() {
+    return `req_${crypto.randomUUID().replaceAll('-', '')}`
+}
+
+export function apiSuccess<T>(
+    data: T,
+    message = 'OK',
+    init?: ApiResponseOptions,
+) {
+    const requestId = init?.requestId ?? createRequestId()
+
+    return Response.json(
+        {
+            requestId,
+            message,
+            data,
+        },
+        init,
+    )
+}
+
+export function apiError(message: string, init?: ApiResponseOptions) {
+    const requestId = init?.requestId ?? createRequestId()
+
+    return Response.json(
+        {
+            requestId,
+            message,
+            data: null,
+            error: {
+                code: init?.code ?? 'INTERNAL_ERROR',
+                details: init?.details,
+            },
+        },
+        init,
+    )
 }
 
 export class ApiClientError extends Error {

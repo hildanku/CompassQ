@@ -4,55 +4,19 @@ import {
     unauthorizedJson,
 } from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api'
+import { getRequestId, parseJsonBody } from '@/lib/api-route'
+import { profileResponseSchema, updateProfileSchema } from '@/lib/contracts'
 
-function parseProfileBody(body: unknown) {
-    if (!body || typeof body !== 'object') {
-        return { error: 'Invalid JSON body' as const }
-    }
-
-    const payload = body as Record<string, unknown>
-    const displayNameValue = payload.displayName
-    const timezoneValue = payload.timezone
-
-    if (
-        displayNameValue !== undefined &&
-        typeof displayNameValue !== 'string'
-    ) {
-        return { error: 'displayName must be a string' as const }
-    }
-
-    if (timezoneValue !== undefined && typeof timezoneValue !== 'string') {
-        return { error: 'timezone must be a string' as const }
-    }
-
-    const displayName = displayNameValue?.trim()
-    const timezone = timezoneValue?.trim()
-
-    if (displayName && displayName.length > 80) {
-        return { error: 'displayName must be 80 characters or fewer' as const }
-    }
-
-    if (timezone !== undefined && !timezone) {
-        return { error: 'timezone cannot be empty' as const }
-    }
-
-    return {
-        data: {
-            display_name: displayName || null,
-            timezone: timezone || 'UTC',
-        },
-    }
-}
-
-export async function GET() {
+export async function GET(request: Request) {
+    const requestId = getRequestId(request)
     const { supabase, user, isConfigured } = await getServerAuth()
 
     if (!isConfigured || !supabase) {
-        return serviceUnavailableJson()
+        return serviceUnavailableJson(requestId)
     }
 
     if (!user) {
-        return unauthorizedJson()
+        return unauthorizedJson(requestId)
     }
 
     const { data, error } = await supabase
@@ -62,69 +26,71 @@ export async function GET() {
         .single()
 
     if (error) {
-        return apiError('Failed to load profile', { status: 500 })
+        return apiError('Failed to load profile', {
+            status: 500,
+            requestId,
+        })
     }
 
-    return apiSuccess(
-        {
-            profile: {
-                id: data.id,
-                displayName: data.display_name,
-                timezone: data.timezone,
-                createdAt: data.created_at,
-                updatedAt: data.updated_at,
-            },
+    const responseData = profileResponseSchema.parse({
+        profile: {
+            id: data.id,
+            displayName: data.display_name,
+            timezone: data.timezone,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
         },
-        'Profile loaded',
-    )
+    })
+
+    return apiSuccess(responseData, 'Profile loaded', { requestId })
 }
 
 export async function PATCH(request: Request) {
+    const requestId = getRequestId(request)
     const { supabase, user, isConfigured } = await getServerAuth()
 
     if (!isConfigured || !supabase) {
-        return serviceUnavailableJson()
+        return serviceUnavailableJson(requestId)
     }
 
     if (!user) {
-        return unauthorizedJson()
+        return unauthorizedJson(requestId)
     }
 
-    let body: unknown
+    const parsed = await parseJsonBody(request, updateProfileSchema, requestId)
 
-    try {
-        body = await request.json()
-    } catch {
-        return apiError('Invalid JSON body', { status: 400 })
+    if ('response' in parsed) {
+        return parsed.response
     }
 
-    const parsed = parseProfileBody(body)
-
-    if ('error' in parsed && typeof parsed.error === 'string') {
-        return apiError(parsed.error, { status: 400 })
+    const normalizedProfile = {
+        display_name: parsed.data.displayName?.trim() || null,
+        timezone: parsed.data.timezone?.trim() || 'UTC',
     }
 
     const { data, error } = await supabase
         .from('profiles')
-        .update(parsed.data)
+        .update(normalizedProfile)
         .eq('id', user.id)
         .select('id, display_name, timezone, created_at, updated_at')
         .single()
 
     if (error) {
-        return apiError('Failed to update profile', { status: 500 })
+        return apiError('Failed to update profile', {
+            status: 500,
+            requestId,
+        })
     }
 
-    return apiSuccess(
-        {
-            profile: {
-                id: data.id,
-                displayName: data.display_name,
-                timezone: data.timezone,
-                createdAt: data.created_at,
-                updatedAt: data.updated_at,
-            },
+    const responseData = profileResponseSchema.parse({
+        profile: {
+            id: data.id,
+            displayName: data.display_name,
+            timezone: data.timezone,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
         },
-        'Profile updated',
-    )
+    })
+
+    return apiSuccess(responseData, 'Profile updated', { requestId })
 }

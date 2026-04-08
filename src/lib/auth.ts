@@ -111,10 +111,18 @@ export async function requireUser() {
     return { supabase, user }
 }
 
-export function unauthorizedJson() {
-    return apiError('Unauthorized', { status: 401 })
+export function unauthorizedJson(requestId?: string) {
+    return apiError('Unauthorized', {
+        status: 401,
+        code: 'UNAUTHORIZED',
+        requestId,
+    })
 }
 
-export function serviceUnavailableJson() {
-    return apiError('Supabase env is not configured', { status: 503 })
+export function serviceUnavailableJson(requestId?: string) {
+    return apiError('Supabase env is not configured', {
+        status: 503,
+        code: 'SERVICE_UNAVAILABLE',
+        requestId,
+    })
 }
