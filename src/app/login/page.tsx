@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     ])
 
     if (isConfigured && user) {
-        redirect(next && next.startsWith('/') ? next : '/protected')
+        redirect(next && next.startsWith('/') ? next : '/')
     }
 
     return (
@@ -49,9 +49,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
                 {isConfigured ? (
                     <LoginForm
-                        next={
-                            next && next.startsWith('/') ? next : '/protected'
-                        }
+                        next={next && next.startsWith('/') ? next : '/'}
                     />
                 ) : (
                     <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-8 shadow-sm shadow-amber-950/5">

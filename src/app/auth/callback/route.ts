@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 function getSafeRedirect(next: string | null) {
     if (!next || !next.startsWith('/')) {
-        return '/protected'
+        return '/'
     }
 
     return next

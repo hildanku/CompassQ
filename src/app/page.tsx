@@ -2,8 +2,20 @@ import Link from 'next/link'
 
 import { getServerAuth } from '@/lib/auth'
 
+import { CheckInHome } from './check-in-home'
+
 export default async function Home() {
-    const { user, isConfigured } = await getServerAuth()
+    const { supabase, user, isConfigured } = await getServerAuth()
+
+    if (isConfigured && user && supabase) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', user.id)
+            .single()
+
+        return <CheckInHome displayName={profile?.display_name ?? null} />
+    }
 
     return (
         <main className="min-h-screen bg-[linear-gradient(160deg,_#022c22,_#052e16_45%,_#f8fafc_45%,_#ffffff)] px-6 py-16 text-zinc-950">
@@ -30,7 +42,7 @@ export default async function Home() {
                             href={
                                 isConfigured
                                     ? user
-                                        ? '/protected'
+                                        ? '/'
                                         : '/login'
                                     : '/login'
                             }
@@ -38,7 +50,7 @@ export default async function Home() {
                         >
                             {isConfigured
                                 ? user
-                                    ? 'Lanjut ke ruang pribadi'
+                                    ? 'Go to home'
                                     : 'Masuk ke CompassQ'
                                 : 'Lihat panduan setup'}
                         </Link>
