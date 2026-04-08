@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
@@ -50,6 +50,46 @@ type ActiveMoment = {
     ayah: RecommendedAyah
 }
 
+type ReflectionResponse = {
+    reflectionId: string
+    sessionId: string
+    ayahKey: string
+    createdAt: string
+}
+
+type SessionCompletionResponse = {
+    sessionId: string
+    completed: boolean
+    streak: {
+        current: number
+        longest: number
+    }
+}
+
+type HistorySession = {
+    sessionId: string
+    ayahKey: string
+    category: CheckInCategory | null
+    completed: boolean
+    createdAt: string
+    reflectionCount: number
+    latestReflection: {
+        content: string
+        createdAt: string
+    } | null
+}
+
+type HistoryResponse = {
+    limit: number
+    sessions: HistorySession[]
+}
+
+const historyQueryKey = ['history', 10] as const
+
+function getReflectionDraftStorageKey(sessionId: string) {
+    return `compassq:reflection-draft:${sessionId}`
+}
+
 async function createCheckIn(category: CheckInCategory) {
     const payload = await apiFetch<CheckInResponse>('/api/v1/check-ins', {
         method: 'POST',
@@ -61,6 +101,58 @@ async function createCheckIn(category: CheckInCategory) {
 
     if (!payload.data) {
         throw new ApiClientError('Failed to create check-in', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
+async function createReflection(sessionId: string, content: string) {
+    const payload = await apiFetch<ReflectionResponse>('/api/v1/reflections', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId, content }),
+    })
+
+    if (!payload.data?.reflectionId) {
+        throw new ApiClientError('Failed to save reflection', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
+async function completeSession(sessionId: string) {
+    const payload = await apiFetch<SessionCompletionResponse>(
+        `/api/v1/sessions/${sessionId}/complete`,
+        {
+            method: 'POST',
+        },
+    )
+
+    if (!payload.data?.sessionId || !payload.data.streak) {
+        throw new ApiClientError('Failed to complete session', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
+async function fetchHistory(limit = 10) {
+    const payload = await apiFetch<HistoryResponse>(
+        `/api/v1/history?limit=${limit}`,
+    )
+
+    if (!payload.data?.sessions) {
+        throw new ApiClientError('Failed to load history', {
             status: 500,
             payload,
         })
@@ -107,7 +199,119 @@ function formatAudioTime(seconds: number) {
     return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
 }
 
+function formatHistoryTimestamp(value: string) {
+    return new Date(value).toLocaleString([], {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    })
+}
+
+function HistorySection({
+    sessions,
+    isLoading,
+    message,
+}: {
+    sessions: HistorySession[]
+    isLoading: boolean
+    message: string | null
+}) {
+    return (
+        <section className="rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-2">
+                    <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                        History
+                    </p>
+                    <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
+                        Recent Quran Moments
+                    </h2>
+                    <p className="text-sm leading-6 text-zinc-600 sm:text-base">
+                        Your latest sessions, including the newest reflection
+                        preview for each moment.
+                    </p>
+                </div>
+            </div>
+
+            {isLoading ? (
+                <div className="mt-5 rounded-3xl bg-zinc-50 p-5 text-sm text-zinc-600">
+                    Loading recent sessions...
+                </div>
+            ) : null}
+
+            {message ? (
+                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                    {message}
+                </div>
+            ) : null}
+
+            {!isLoading && !message && sessions.length === 0 ? (
+                <div className="mt-5 rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-5 text-sm leading-6 text-zinc-600">
+                    No completed session history yet. Finish one Quran Moment
+                    and it will appear here.
+                </div>
+            ) : null}
+
+            {!isLoading && !message && sessions.length > 0 ? (
+                <div className="mt-5 grid gap-4">
+                    {sessions.map((session) => (
+                        <article
+                            key={session.sessionId}
+                            className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
+                        >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium text-zinc-500">
+                                        {session.category
+                                            ? categoryLabels[session.category]
+                                            : 'Unknown category'}
+                                    </p>
+                                    <h3 className="text-lg font-semibold text-zinc-950">
+                                        Ayah {session.ayahKey}
+                                    </h3>
+                                </div>
+                                <div className="text-right text-sm text-zinc-500">
+                                    <p>
+                                        {formatHistoryTimestamp(
+                                            session.createdAt,
+                                        )}
+                                    </p>
+                                    <p>
+                                        {session.completed
+                                            ? 'Completed'
+                                            : 'In progress'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 rounded-3xl bg-white p-4 text-sm leading-6 text-zinc-700">
+                                <p className="font-medium text-zinc-900">
+                                    Latest reflection
+                                </p>
+                                <p className="mt-2">
+                                    {session.latestReflection
+                                        ? session.latestReflection.content ||
+                                          'Empty reflection saved.'
+                                        : 'No reflection saved for this session yet.'}
+                                </p>
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+                                <p>
+                                    {session.reflectionCount} reflection
+                                    {session.reflectionCount === 1 ? '' : 's'}
+                                </p>
+                                <p>Session {session.sessionId}</p>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            ) : null}
+        </section>
+    )
+}
+
 export function CheckInHome({ displayName }: CheckInHomeProps) {
+    const queryClient = useQueryClient()
     const [selectedCategory, setSelectedCategory] =
         useState<CheckInCategory>('anxiety')
     const [message, setMessage] = useState<string | null>(null)
@@ -116,7 +320,25 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
     const [audioDuration, setAudioDuration] = useState(0)
     const [isAudioPlaying, setIsAudioPlaying] = useState(false)
     const [hasAudioPlaybackError, setHasAudioPlaybackError] = useState(false)
+    const [reflectionDraft, setReflectionDraft] = useState('')
+    const [reflectionError, setReflectionError] = useState<string | null>(null)
+    const [reflectionStep, setReflectionStep] = useState<'compose' | 'next'>(
+        'compose',
+    )
+    const [submittedReflectionLength, setSubmittedReflectionLength] = useState<
+        number | null
+    >(null)
+    const [savedReflectionForSessionId, setSavedReflectionForSessionId] =
+        useState<string | null>(null)
+    const [completionSummary, setCompletionSummary] = useState<
+        SessionCompletionResponse['streak'] | null
+    >(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+
+    const historyQuery = useQuery({
+        queryKey: historyQueryKey,
+        queryFn: () => fetchHistory(10),
+    })
 
     const createCheckInMutation = useMutation({
         mutationFn: createCheckIn,
@@ -142,6 +364,78 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
         },
     })
 
+    function resetReflectionComposer(sessionId?: string) {
+        const storedDraft =
+            sessionId && typeof window !== 'undefined'
+                ? (window.localStorage.getItem(
+                      getReflectionDraftStorageKey(sessionId),
+                  ) ?? '')
+                : ''
+
+        setReflectionDraft(storedDraft)
+        setReflectionError(null)
+        setReflectionStep('compose')
+        setSubmittedReflectionLength(null)
+        setSavedReflectionForSessionId(null)
+        setCompletionSummary(null)
+    }
+
+    const createReflectionMutation = useMutation({
+        mutationFn: ({
+            sessionId,
+            content,
+        }: {
+            sessionId: string
+            content: string
+        }) => createReflection(sessionId, content),
+        onError: (error) => {
+            if (error instanceof ApiClientError) {
+                setReflectionError(error.message)
+            } else {
+                setReflectionError(
+                    'Failed to save your reflection. Please try again.',
+                )
+            }
+
+            if (activeMoment && typeof window !== 'undefined') {
+                window.localStorage.setItem(
+                    getReflectionDraftStorageKey(activeMoment.sessionId),
+                    reflectionDraft,
+                )
+            }
+        },
+        onSuccess: () => {
+            if (activeMoment && typeof window !== 'undefined') {
+                window.localStorage.removeItem(
+                    getReflectionDraftStorageKey(activeMoment.sessionId),
+                )
+            }
+
+            setSubmittedReflectionLength(reflectionDraft.trim().length)
+            setReflectionError(null)
+            setSavedReflectionForSessionId(activeMoment?.sessionId ?? null)
+        },
+    })
+
+    const completeSessionMutation = useMutation({
+        mutationFn: completeSession,
+        onSuccess: async (completion) => {
+            setCompletionSummary(completion.streak)
+            setReflectionDraft('')
+            setReflectionError(null)
+            setReflectionStep('next')
+            await queryClient.invalidateQueries({ queryKey: historyQueryKey })
+        },
+        onError: (error) => {
+            if (error instanceof ApiClientError) {
+                setReflectionError(error.message)
+                return
+            }
+
+            setReflectionError('Failed to complete this session. Please retry.')
+        },
+    })
+
     async function handleContinue() {
         setMessage(null)
         setActiveMoment(null)
@@ -149,6 +443,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
         setAudioDuration(0)
         setIsAudioPlaying(false)
         setHasAudioPlaybackError(false)
+        resetReflectionComposer()
 
         try {
             const checkIn =
@@ -163,6 +458,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                 category: checkIn.category,
                 ayah: moment.ayah,
             })
+            resetReflectionComposer(moment.sessionId)
             setMessage(null)
         } catch {
             // Error state is already handled by the mutation callbacks.
@@ -177,10 +473,44 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
         setAudioDuration(0)
         setIsAudioPlaying(false)
         setHasAudioPlaybackError(false)
+        resetReflectionComposer()
+    }
+
+    async function handleSubmitReflection() {
+        if (!activeMoment) {
+            return
+        }
+
+        setReflectionError(null)
+
+        try {
+            if (savedReflectionForSessionId === activeMoment.sessionId) {
+                await completeSessionMutation.mutateAsync(
+                    activeMoment.sessionId,
+                )
+                return
+            }
+
+            await createReflectionMutation.mutateAsync({
+                sessionId: activeMoment.sessionId,
+                content: reflectionDraft,
+            })
+            await completeSessionMutation.mutateAsync(activeMoment.sessionId)
+        } catch {
+            // Error state is already handled by the mutation callback.
+        }
+    }
+
+    function handleWriteAnotherReflection() {
+        setReflectionDraft('')
+        setReflectionError(null)
+        setReflectionStep('compose')
+        setSubmittedReflectionLength(null)
     }
 
     const isSubmitting =
         createCheckInMutation.isPending || recommendMomentMutation.isPending
+    const activeSessionId = activeMoment?.sessionId ?? null
 
     useEffect(() => {
         const audio = audioRef.current
@@ -240,6 +570,21 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
         }
     }, [activeMoment?.ayah.audioUrl])
 
+    useEffect(() => {
+        if (!activeSessionId || typeof window === 'undefined') {
+            return
+        }
+
+        const storageKey = getReflectionDraftStorageKey(activeSessionId)
+
+        if (reflectionStep === 'next' || reflectionDraft.length === 0) {
+            window.localStorage.removeItem(storageKey)
+            return
+        }
+
+        window.localStorage.setItem(storageKey, reflectionDraft)
+    }, [activeSessionId, reflectionDraft, reflectionStep])
+
     async function handleToggleAudioPlayback() {
         const audio = audioRef.current
 
@@ -289,6 +634,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
     const shouldShowLoadingSkeleton = isSubmitting && !activeMoment
     const hasAudio =
         Boolean(activeMoment?.ayah.audioUrl) && !hasAudioPlaybackError
+    const isSavingReflection =
+        createReflectionMutation.isPending || completeSessionMutation.isPending
 
     if (activeMoment) {
         return (
@@ -503,6 +850,138 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             <p>Check-in ID: {activeMoment.checkInId}</p>
                             <p>Session ID: {activeMoment.sessionId}</p>
                         </div>
+
+                        <section className="mt-6 rounded-[1.75rem] border border-zinc-200 bg-white p-5 sm:p-6">
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
+                                    Reflection
+                                </p>
+                                <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
+                                    Capture this moment in one line.
+                                </h2>
+                                <p className="text-sm leading-6 text-zinc-600 sm:text-base">
+                                    Reflection is optional. You can continue
+                                    with an empty line or save a short note up
+                                    to 280 characters.
+                                </p>
+                            </div>
+
+                            {reflectionStep === 'compose' ? (
+                                <div className="mt-5 space-y-4">
+                                    <label className="block space-y-2">
+                                        <span className="text-sm font-medium text-zinc-900">
+                                            Your reflection
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={reflectionDraft}
+                                            maxLength={280}
+                                            onChange={(event) => {
+                                                setReflectionDraft(
+                                                    event.target.value,
+                                                )
+                                                if (reflectionError) {
+                                                    setReflectionError(null)
+                                                }
+                                            }}
+                                            placeholder="What stands out for you right now?"
+                                            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                                        />
+                                    </label>
+
+                                    <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-500">
+                                        <p>
+                                            {reflectionDraft.length}/280
+                                            characters
+                                        </p>
+                                        <p>
+                                            {reflectionDraft.trim().length === 0
+                                                ? 'Empty reflection will still be saved.'
+                                                : 'Single-line reflection only.'}
+                                        </p>
+                                    </div>
+
+                                    {reflectionError ? (
+                                        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+                                            <p>{reflectionError}</p>
+                                            <button
+                                                type="button"
+                                                onClick={handleSubmitReflection}
+                                                disabled={isSavingReflection}
+                                                className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                            >
+                                                Retry reflection submit
+                                            </button>
+                                        </div>
+                                    ) : null}
+
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitReflection}
+                                        disabled={isSavingReflection}
+                                        className="w-full rounded-2xl bg-zinc-950 px-5 py-4 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                                    >
+                                        {isSavingReflection
+                                            ? 'Saving reflection...'
+                                            : reflectionDraft.trim().length ===
+                                                0
+                                              ? 'Continue without reflection'
+                                              : 'Save reflection and continue'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="mt-5 space-y-4 rounded-[1.75rem] bg-emerald-50 p-5 text-emerald-950">
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
+                                            Next step ready
+                                        </p>
+                                        <h3 className="text-xl font-semibold tracking-tight">
+                                            Reflection captured for this
+                                            session.
+                                        </h3>
+                                        <p className="text-sm leading-6 text-emerald-900/80 sm:text-base">
+                                            {submittedReflectionLength === 0
+                                                ? 'You continued without adding text, and the session still recorded an empty reflection entry.'
+                                                : 'Your reflection has been saved. You can keep moving forward from this Quran Moment.'}
+                                        </p>
+                                        {completionSummary ? (
+                                            <p className="text-sm leading-6 text-emerald-900/80 sm:text-base">
+                                                Return streak:{' '}
+                                                {completionSummary.current} day
+                                                {completionSummary.current === 1
+                                                    ? ''
+                                                    : 's'}{' '}
+                                                current,{' '}
+                                                {completionSummary.longest} day
+                                                {completionSummary.longest === 1
+                                                    ? ''
+                                                    : 's'}{' '}
+                                                longest.
+                                            </p>
+                                        ) : null}
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                handleWriteAnotherReflection
+                                            }
+                                            className="rounded-full border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                                        >
+                                            Write another reflection
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleStartAnotherCheckIn}
+                                            className="rounded-full bg-emerald-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800"
+                                        >
+                                            Start another check-in
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </section>
                     </section>
                 </div>
             </main>
@@ -643,6 +1122,18 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         </p>
                     </article>
                 </section>
+
+                <HistorySection
+                    sessions={historyQuery.data?.sessions ?? []}
+                    isLoading={historyQuery.isLoading}
+                    message={
+                        historyQuery.error instanceof ApiClientError
+                            ? historyQuery.error.message
+                            : historyQuery.error
+                              ? 'Failed to load recent history.'
+                              : null
+                    }
+                />
             </div>
         </main>
     )
