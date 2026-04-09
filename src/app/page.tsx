@@ -55,10 +55,14 @@ export default async function Home() {
                                 : 'Lihat panduan setup'}
                         </Link>
                         <Link
-                            href="/api/v1/profile"
+                            href={
+                                isConfigured && user ? '/protected' : '/login'
+                            }
                             className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                         >
-                            Buka profil API
+                            {isConfigured && user
+                                ? 'Buka profil'
+                                : 'Lihat alur produk'}
                         </Link>
                     </div>
                     {!isConfigured ? (

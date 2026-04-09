@@ -1,7 +1,12 @@
 'use client'
 
+import { useMutation } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
+import {
+    signInWithMagicLink as signInWithMagicLinkRequest,
+    signInWithOAuth as signInWithOAuthRequest,
+} from '@/lib/queries/auth'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
 type LoginFormProps = {
@@ -12,56 +17,40 @@ export function LoginForm({ next }: LoginFormProps) {
     const supabase = useMemo(() => createBrowserSupabaseClient(), [])
     const [email, setEmail] = useState('')
     const [message, setMessage] = useState<string | null>(null)
-    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const magicLinkMutation = useMutation({
+        mutationFn: (nextPath: string) =>
+            signInWithMagicLinkRequest(supabase, email, nextPath),
+        onSuccess: (successMessage) => {
+            setMessage(successMessage)
+        },
+        onError: (error) => {
+            setMessage(error instanceof Error ? error.message : 'Login failed')
+        },
+    })
+
+    const oauthMutation = useMutation({
+        mutationFn: (provider: 'google' | 'github') =>
+            signInWithOAuthRequest(supabase, provider, next),
+        onError: (error) => {
+            setMessage(error instanceof Error ? error.message : 'Login failed')
+        },
+    })
+
+    const isSubmitting = magicLinkMutation.isPending || oauthMutation.isPending
 
     async function signInWithMagicLink(
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
-        setIsSubmitting(true)
         setMessage(null)
 
-        const redirectTo = new URL('/auth/callback', window.location.origin)
-        redirectTo.searchParams.set('next', next)
-
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: redirectTo.toString(),
-                data: {
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                },
-            },
-        })
-
-        setIsSubmitting(false)
-
-        if (error) {
-            setMessage(error.message)
-            return
-        }
-
-        setMessage('Magic link sent. Check your inbox to continue.')
+        await magicLinkMutation.mutateAsync(next)
     }
 
     async function signInWithOAuth(provider: 'google' | 'github') {
-        setIsSubmitting(true)
         setMessage(null)
-
-        const redirectTo = new URL('/auth/callback', window.location.origin)
-        redirectTo.searchParams.set('next', next)
-
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider,
-            options: {
-                redirectTo: redirectTo.toString(),
-            },
-        })
-
-        if (error) {
-            setIsSubmitting(false)
-            setMessage(error.message)
-        }
+        await oauthMutation.mutateAsync(provider)
     }
 
     return (
