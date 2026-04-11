@@ -68,6 +68,9 @@ export function HistoryLibrary() {
                     }
                     title="Your last 10 Quran Moments"
                     description="Each session stays tied to its ayah, category, and latest reflection preview so you can see your return pattern clearly."
+                    onRetry={() => {
+                        void historyQuery.refetch()
+                    }}
                 />
             </div>
         </main>

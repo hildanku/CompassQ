@@ -29,6 +29,7 @@ type HistorySectionProps = {
     description?: string
     actionHref?: string
     actionLabel?: string
+    onRetry?: () => void
 }
 
 export function HistorySection({
@@ -39,6 +40,7 @@ export function HistorySection({
     description = 'Your latest sessions, including the newest reflection preview for each moment.',
     actionHref,
     actionLabel,
+    onRetry,
 }: HistorySectionProps) {
     return (
         <section className="rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
@@ -73,7 +75,16 @@ export function HistorySection({
 
             {message ? (
                 <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-                    {message}
+                    <p>{message}</p>
+                    {onRetry ? (
+                        <button
+                            type="button"
+                            onClick={onRetry}
+                            className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                        >
+                            Retry history load
+                        </button>
+                    ) : null}
                 </div>
             ) : null}
 

@@ -1024,6 +1024,9 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                     }
                     actionHref="/history"
                     actionLabel="View all history"
+                    onRetry={() => {
+                        void historyQuery.refetch()
+                    }}
                 />
             </div>
         </main>

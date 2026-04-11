@@ -160,6 +160,18 @@ export function SavedLibrary() {
     const selectedAyahAlreadySaved = collections.some((collection) =>
         collection.items.some((item) => item.ayahKey === selectedAyahKey),
     )
+    const bookmarksErrorMessage =
+        bookmarksQuery.error instanceof ApiClientError
+            ? bookmarksQuery.error.message
+            : bookmarksQuery.error
+              ? 'Failed to load bookmarks.'
+              : null
+    const collectionsErrorMessage =
+        collectionsQuery.error instanceof ApiClientError
+            ? collectionsQuery.error.message
+            : collectionsQuery.error
+              ? 'Failed to load collections.'
+              : null
 
     async function handleCreateCollection(
         event: React.FormEvent<HTMLFormElement>,
@@ -238,6 +250,19 @@ export function SavedLibrary() {
                                 {collectionsQuery.isLoading ? (
                                     <div className="rounded-3xl bg-zinc-50 p-5 text-sm text-zinc-600">
                                         Loading collections...
+                                    </div>
+                                ) : collectionsErrorMessage ? (
+                                    <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                                        <p>{collectionsErrorMessage}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                void collectionsQuery.refetch()
+                                            }}
+                                            className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                                        >
+                                            Retry collections load
+                                        </button>
                                     </div>
                                 ) : collections.length === 0 ? (
                                     <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-5 text-sm leading-6 text-zinc-600">
@@ -375,6 +400,19 @@ export function SavedLibrary() {
                             <div className="rounded-3xl bg-white p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
                                 Loading bookmarks...
                             </div>
+                        ) : bookmarksErrorMessage ? (
+                            <div className="rounded-3xl border border-amber-200 bg-white p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
+                                <p>{bookmarksErrorMessage}</p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        void bookmarksQuery.refetch()
+                                    }}
+                                    className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                                >
+                                    Retry bookmarks load
+                                </button>
+                            </div>
                         ) : bookmarks.length === 0 ? (
                             <div className="rounded-3xl border border-dashed border-zinc-200 bg-white p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">
                                 No bookmarks yet. Save an ayah from the Quran
@@ -420,6 +458,19 @@ export function SavedLibrary() {
                         {collectionsQuery.isLoading ? (
                             <div className="rounded-3xl bg-white p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
                                 Loading collections...
+                            </div>
+                        ) : collectionsErrorMessage ? (
+                            <div className="rounded-3xl border border-amber-200 bg-white p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
+                                <p>{collectionsErrorMessage}</p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        void collectionsQuery.refetch()
+                                    }}
+                                    className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                                >
+                                    Retry collections load
+                                </button>
                             </div>
                         ) : collections.length === 0 ? (
                             <div className="rounded-3xl border border-dashed border-zinc-200 bg-white p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">

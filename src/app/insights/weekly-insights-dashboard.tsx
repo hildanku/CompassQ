@@ -122,9 +122,21 @@ export function WeeklyInsightsDashboard({
 
                     {weeklyInsightsQuery.error ? (
                         <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-                            {weeklyInsightsQuery.error instanceof ApiClientError
-                                ? weeklyInsightsQuery.error.message
-                                : 'Failed to load weekly recap.'}
+                            <p>
+                                {weeklyInsightsQuery.error instanceof
+                                ApiClientError
+                                    ? weeklyInsightsQuery.error.message
+                                    : 'Failed to load weekly recap.'}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void weeklyInsightsQuery.refetch()
+                                }}
+                                className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                            >
+                                Retry weekly recap
+                            </button>
                         </div>
                     ) : null}
 
