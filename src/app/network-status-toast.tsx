@@ -1,37 +1,45 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+
+function subscribe(callback: () => void) {
+    window.addEventListener('online', callback)
+    window.addEventListener('offline', callback)
+
+    return () => {
+        window.removeEventListener('online', callback)
+        window.removeEventListener('offline', callback)
+    }
+}
+
+function getSnapshot() {
+    return navigator.onLine
+}
+
+function getServerSnapshot() {
+    return true
+}
 
 export function NetworkStatusToast() {
-    const [status, setStatus] = useState<'offline' | 'online' | null>(() => {
-        if (typeof navigator !== 'undefined' && !navigator.onLine) {
-            return 'offline'
-        }
-
-        return null
-    })
+    const isOnline = useSyncExternalStore(
+        subscribe,
+        getSnapshot,
+        getServerSnapshot,
+    )
+    const [showRestoredToast, setShowRestoredToast] = useState(false)
 
     useEffect(() => {
         let hideTimer: ReturnType<typeof setTimeout> | null = null
-
-        function handleOffline() {
-            if (hideTimer) {
-                clearTimeout(hideTimer)
-            }
-
-            setStatus('offline')
-        }
 
         function handleOnline() {
             if (hideTimer) {
                 clearTimeout(hideTimer)
             }
 
-            setStatus('online')
-            hideTimer = setTimeout(() => setStatus(null), 4000)
+            setShowRestoredToast(true)
+            hideTimer = setTimeout(() => setShowRestoredToast(false), 4000)
         }
 
-        window.addEventListener('offline', handleOffline)
         window.addEventListener('online', handleOnline)
 
         return () => {
@@ -39,16 +47,15 @@ export function NetworkStatusToast() {
                 clearTimeout(hideTimer)
             }
 
-            window.removeEventListener('offline', handleOffline)
             window.removeEventListener('online', handleOnline)
         }
     }, [])
 
-    if (!status) {
+    if (isOnline && !showRestoredToast) {
         return null
     }
 
-    const isOffline = status === 'offline'
+    const isOffline = !isOnline
 
     return (
         <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4">
