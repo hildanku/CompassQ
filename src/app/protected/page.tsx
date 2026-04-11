@@ -87,6 +87,12 @@ export default async function ProtectedPage() {
 
                 <div className="flex flex-wrap gap-3 text-sm">
                     <Link
+                        href="/history"
+                        className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
+                    >
+                        History
+                    </Link>
+                    <Link
                         href="/saved"
                         className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
                     >

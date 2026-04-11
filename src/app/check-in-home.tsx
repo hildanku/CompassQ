@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+import { HistorySection } from '@/app/history/history-section'
 import { ApiClientError } from '@/lib/api'
 import { checkInCategoryValues } from '@/lib/contracts'
 import {
@@ -14,7 +15,6 @@ import {
     historyQueryKey,
     recommendMoment,
     type CheckInCategory,
-    type HistorySession,
     type RecommendedAyah,
     type SessionCompletionResponse,
 } from '@/lib/queries/moments'
@@ -61,117 +61,6 @@ function formatAudioTime(seconds: number) {
     const remainingSeconds = wholeSeconds % 60
 
     return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
-}
-
-function formatHistoryTimestamp(value: string) {
-    return new Date(value).toLocaleString([], {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    })
-}
-
-function HistorySection({
-    sessions,
-    isLoading,
-    message,
-}: {
-    sessions: HistorySession[]
-    isLoading: boolean
-    message: string | null
-}) {
-    return (
-        <section className="rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="space-y-2">
-                    <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                        History
-                    </p>
-                    <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
-                        Recent Quran Moments
-                    </h2>
-                    <p className="text-sm leading-6 text-zinc-600 sm:text-base">
-                        Your latest sessions, including the newest reflection
-                        preview for each moment.
-                    </p>
-                </div>
-            </div>
-
-            {isLoading ? (
-                <div className="mt-5 rounded-3xl bg-zinc-50 p-5 text-sm text-zinc-600">
-                    Loading recent sessions...
-                </div>
-            ) : null}
-
-            {message ? (
-                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-                    {message}
-                </div>
-            ) : null}
-
-            {!isLoading && !message && sessions.length === 0 ? (
-                <div className="mt-5 rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-5 text-sm leading-6 text-zinc-600">
-                    No completed session history yet. Finish one Quran Moment
-                    and it will appear here.
-                </div>
-            ) : null}
-
-            {!isLoading && !message && sessions.length > 0 ? (
-                <div className="mt-5 grid gap-4">
-                    {sessions.map((session) => (
-                        <article
-                            key={session.sessionId}
-                            className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
-                        >
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-zinc-500">
-                                        {session.category
-                                            ? categoryLabels[session.category]
-                                            : 'Unknown category'}
-                                    </p>
-                                    <h3 className="text-lg font-semibold text-zinc-950">
-                                        Ayah {session.ayahKey}
-                                    </h3>
-                                </div>
-                                <div className="text-right text-sm text-zinc-500">
-                                    <p>
-                                        {formatHistoryTimestamp(
-                                            session.createdAt,
-                                        )}
-                                    </p>
-                                    <p>
-                                        {session.completed
-                                            ? 'Completed'
-                                            : 'In progress'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 rounded-3xl bg-white p-4 text-sm leading-6 text-zinc-700">
-                                <p className="font-medium text-zinc-900">
-                                    Latest reflection
-                                </p>
-                                <p className="mt-2">
-                                    {session.latestReflection
-                                        ? session.latestReflection.content ||
-                                          'Empty reflection saved.'
-                                        : 'No reflection saved for this session yet.'}
-                                </p>
-                            </div>
-
-                            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                                <p>
-                                    {session.reflectionCount} reflection
-                                    {session.reflectionCount === 1 ? '' : 's'}
-                                </p>
-                                <p>Session {session.sessionId}</p>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            ) : null}
-        </section>
-    )
 }
 
 function SaveActions({ ayahKey }: { ayahKey: string }) {
@@ -1003,6 +892,12 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         >
                             Profile
                         </Link>
+                        <Link
+                            href="/history"
+                            className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            History
+                        </Link>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -1121,6 +1016,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                               ? 'Failed to load recent history.'
                               : null
                     }
+                    actionHref="/history"
+                    actionLabel="View all history"
                 />
             </div>
         </main>
