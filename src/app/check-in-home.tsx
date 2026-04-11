@@ -898,6 +898,12 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         >
                             History
                         </Link>
+                        <Link
+                            href="/insights"
+                            className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            Weekly recap
+                        </Link>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -35,6 +35,12 @@ export function HistoryLibrary() {
 
                         <div className="flex flex-wrap gap-3 text-sm">
                             <Link
+                                href="/insights"
+                                className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10"
+                            >
+                                Weekly recap
+                            </Link>
+                            <Link
                                 href="/"
                                 className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10"
                             >

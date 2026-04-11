@@ -196,6 +196,12 @@ export function SavedLibrary() {
                                 History
                             </Link>
                             <Link
+                                href="/insights"
+                                className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10"
+                            >
+                                Weekly recap
+                            </Link>
+                            <Link
                                 href="/"
                                 className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10"
                             >
