@@ -1,28 +1,8 @@
 import Link from 'next/link'
 
-import { checkInCategoryValues } from '@/lib/contracts'
+import { checkInCategoryLabels } from '@/lib/constant'
 import { type HistorySession } from '@/lib/queries/moments'
-
-const historyTimestampFormatter = new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-})
-
-const categoryLabels: Record<(typeof checkInCategoryValues)[number], string> = {
-    anxiety: 'Anxiety',
-    gratitude: 'Gratitude',
-    patience: 'Patience',
-    guidance: 'Guidance',
-    hope: 'Hope',
-    discipline: 'Discipline',
-    feeling_distant: 'Feeling Distant',
-    need_comfort: 'Need Comfort',
-}
-
-function formatHistoryTimestamp(value: string) {
-    return `${historyTimestampFormatter.format(new Date(value))} UTC`
-}
+import { formatUtcTimestamp } from '@/lib/utils'
 
 type HistorySectionProps = {
     sessions: HistorySession[]
@@ -109,7 +89,9 @@ export function HistorySection({
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-zinc-500">
                                         {session.category
-                                            ? categoryLabels[session.category]
+                                            ? checkInCategoryLabels[
+                                                  session.category
+                                              ]
                                             : 'Unknown category'}
                                     </p>
                                     <h3 className="text-lg font-semibold text-zinc-950">
@@ -118,9 +100,7 @@ export function HistorySection({
                                 </div>
                                 <div className="text-right text-sm text-zinc-500">
                                     <p>
-                                        {formatHistoryTimestamp(
-                                            session.createdAt,
-                                        )}
+                                        {formatUtcTimestamp(session.createdAt)}
                                     </p>
                                     <p>
                                         {session.completed

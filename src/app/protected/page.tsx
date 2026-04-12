@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { requireUser } from '@/lib/auth'
+import { formatUtcTimestamp } from '@/lib/utils'
 
 import { ProfileForm } from './profile-form'
 
@@ -55,9 +56,7 @@ export default async function ProtectedPage() {
                                 </dt>
                                 <dd className="mt-1">
                                     {profile?.created_at
-                                        ? new Date(
-                                              profile.created_at,
-                                          ).toLocaleString()
+                                        ? formatUtcTimestamp(profile.created_at)
                                         : 'Profile row missing'}
                                 </dd>
                             </div>

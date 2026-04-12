@@ -2,15 +2,7 @@ import { apiSuccess } from '@/lib/api'
 import { requireApiUser } from '@/lib/api-auth'
 import { errorFromStatus, getRequestId, parseJsonBody } from '@/lib/api-route'
 import { createCheckInSchema } from '@/lib/contracts'
-
-function getLocalDate(timezone: string) {
-    return new Intl.DateTimeFormat('en-CA', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(new Date())
-}
+import { getLocalDateInTimeZone } from '@/lib/utils'
 
 export async function POST(request: Request) {
     const requestId = getRequestId(request)
@@ -40,7 +32,7 @@ export async function POST(request: Request) {
         )
     }
 
-    const localDate = getLocalDate(profile.timezone)
+    const localDate = getLocalDateInTimeZone(profile.timezone)
     const payload = {
         user_id: auth.user.id,
         category: parsed.data.category,

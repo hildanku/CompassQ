@@ -9,6 +9,7 @@ import {
     checkInCategoryValues,
     weeklyInsightsQuerySchema,
 } from '@/lib/contracts'
+import { addDaysToIsoDate } from '@/lib/utils'
 
 type CheckInCategory = (typeof checkInCategoryValues)[number]
 
@@ -19,13 +20,6 @@ type SessionInsightRow = {
         local_date: string
         category: CheckInCategory
     }>
-}
-
-function addDays(dateText: string, days: number) {
-    const date = new Date(`${dateText}T00:00:00Z`)
-    date.setUTCDate(date.getUTCDate() + days)
-
-    return date.toISOString().slice(0, 10)
 }
 
 function sortEntriesByCount<T extends { count: number }>(entries: T[]) {
@@ -50,7 +44,7 @@ export async function GET(request: Request) {
         return parsed.response
     }
 
-    const weekEnd = addDays(parsed.data.weekStart, 6)
+    const weekEnd = addDaysToIsoDate(parsed.data.weekStart, 6)
 
     const { data: sessions, error: sessionsError } = await auth.supabase
         .from('sessions')

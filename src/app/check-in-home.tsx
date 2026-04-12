@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { HistorySection } from '@/app/history/history-section'
 import { ApiClientError } from '@/lib/api'
+import { checkInCategoryLabels } from '@/lib/constant'
 import { checkInCategoryValues } from '@/lib/contracts'
 import {
     completeSession,
@@ -24,17 +25,6 @@ import {
     fetchBookmarks,
     removeBookmark,
 } from '@/lib/queries/save-actions'
-
-const categoryLabels: Record<(typeof checkInCategoryValues)[number], string> = {
-    anxiety: 'Anxiety',
-    gratitude: 'Gratitude',
-    patience: 'Patience',
-    guidance: 'Guidance',
-    hope: 'Hope',
-    discipline: 'Discipline',
-    feeling_distant: 'Feeling Distant',
-    need_comfort: 'Need Comfort',
-}
 
 type ActiveMoment = {
     checkInId: string
@@ -528,7 +518,11 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                     </h1>
                                     <p className="text-sm leading-6 text-zinc-600 sm:text-base">
                                         Category:{' '}
-                                        {categoryLabels[activeMoment.category]}
+                                        {
+                                            checkInCategoryLabels[
+                                                activeMoment.category
+                                            ]
+                                        }
                                     </p>
                                 </div>
                             </div>
@@ -924,7 +918,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                     }`}
                                     aria-pressed={isSelected}
                                 >
-                                    {categoryLabels[category]}
+                                    {checkInCategoryLabels[category]}
                                 </button>
                             )
                         })}
@@ -935,7 +929,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             Selected category
                         </p>
                         <p className="text-sm leading-6 text-zinc-600 sm:text-base">
-                            {categoryLabels[selectedCategory]}
+                            {checkInCategoryLabels[selectedCategory]}
                         </p>
                     </div>
 

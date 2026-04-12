@@ -5,28 +5,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { ApiClientError } from '@/lib/api'
+import { addDaysToIsoDate, formatUtcDateRange } from '@/lib/utils'
 import {
     fetchWeeklyInsights,
     weeklyInsightsQueryKey,
 } from '@/lib/queries/insights'
-
-function addDays(dateText: string, days: number) {
-    const date = new Date(`${dateText}T00:00:00Z`)
-    date.setUTCDate(date.getUTCDate() + days)
-
-    return date.toISOString().slice(0, 10)
-}
-
-function formatDateRange(start: string, end: string) {
-    return `${new Date(`${start}T00:00:00Z`).toLocaleDateString([], {
-        month: 'short',
-        day: 'numeric',
-    })} - ${new Date(`${end}T00:00:00Z`).toLocaleDateString([], {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    })}`
-}
 
 export function WeeklyInsightsDashboard({
     initialWeekStart,
@@ -86,9 +69,9 @@ export function WeeklyInsightsDashboard({
                                 Active week
                             </p>
                             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-                                {formatDateRange(
+                                {formatUtcDateRange(
                                     weekStart,
-                                    addDays(weekStart, 6),
+                                    addDaysToIsoDate(weekStart, 6),
                                 )}
                             </h2>
                         </div>
@@ -97,7 +80,9 @@ export function WeeklyInsightsDashboard({
                             <button
                                 type="button"
                                 onClick={() =>
-                                    setWeekStart(addDays(weekStart, -7))
+                                    setWeekStart(
+                                        addDaysToIsoDate(weekStart, -7),
+                                    )
                                 }
                                 className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
                             >
@@ -166,7 +151,7 @@ export function WeeklyInsightsDashboard({
                                     <p className="mt-3 text-sm leading-7 text-zinc-700">
                                         {weeklyInsights.returnDays === 0
                                             ? 'No completed return days yet for this week.'
-                                            : `You completed ${weeklyInsights.returnDays} return day${weeklyInsights.returnDays === 1 ? '' : 's'} between ${formatDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
+                                            : `You completed ${weeklyInsights.returnDays} return day${weeklyInsights.returnDays === 1 ? '' : 's'} between ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
                                     </p>
                                 </article>
                             </div>

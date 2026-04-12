@@ -15,16 +15,7 @@ import {
     fetchCollections,
     removeBookmark,
 } from '@/lib/queries/save-actions'
-
-const savedAtFormatter = new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-})
-
-function formatSavedAt(value: string) {
-    return `${savedAtFormatter.format(new Date(value))} UTC`
-}
+import { formatUtcTimestamp } from '@/lib/utils'
 
 function SavedAyahCard({
     ayahKey,
@@ -47,7 +38,7 @@ function SavedAyahCard({
                     </h3>
                 </div>
                 <p className="text-sm text-zinc-500">
-                    Saved {formatSavedAt(createdAt)}
+                    Saved {formatUtcTimestamp(createdAt)}
                 </p>
             </div>
 
@@ -493,7 +484,7 @@ export function SavedLibrary() {
                                             </h3>
                                             <p className="text-sm text-zinc-500">
                                                 Created{' '}
-                                                {formatSavedAt(
+                                                {formatUtcTimestamp(
                                                     collection.createdAt,
                                                 )}
                                             </p>
