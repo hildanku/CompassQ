@@ -60,7 +60,7 @@ export function NetworkStatusToast() {
     return (
         <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4">
             <div
-                className={`pointer-events-auto w-full max-w-md rounded-[1.5rem] border px-4 py-4 shadow-2xl backdrop-blur ${
+                className={`pointer-events-auto w-full max-w-md rounded-3xl border px-4 py-4 shadow-2xl backdrop-blur ${
                     isOffline
                         ? 'border-amber-200 bg-amber-50/95 text-amber-950'
                         : 'border-emerald-200 bg-emerald-50/95 text-emerald-950'

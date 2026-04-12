@@ -153,10 +153,10 @@ export function CheckInAudioPlayer({
                 Your browser does not support audio playback.
             </audio>
 
-            <div className="overflow-hidden rounded-[1.75rem] border border-zinc-800 bg-[linear-gradient(180deg,_#1f1f1f_0%,_#121212_100%)] p-5 text-white shadow-xl shadow-zinc-950/20">
+            <div className="overflow-hidden rounded-[1.75rem] border border-zinc-800 bg-[linear-gradient(180deg,#1f1f1f_0%,#121212_100%)] p-5 text-white shadow-xl shadow-zinc-950/20">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-4">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(29,185,84,0.7),_rgba(29,185,84,0.15)_45%,_rgba(255,255,255,0.04)_70%)] shadow-lg shadow-black/30">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_top,rgba(29,185,84,0.7),rgba(29,185,84,0.15)_45%,rgba(255,255,255,0.04)_70%)] shadow-lg shadow-black/30">
                             <span className="text-lg font-semibold text-emerald-50">
                                 Q
                             </span>

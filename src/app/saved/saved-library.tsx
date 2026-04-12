@@ -178,7 +178,7 @@ export function SavedLibrary() {
     return (
         <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
             <div className="mx-auto flex max-w-6xl flex-col gap-8">
-                <section className="rounded-[2rem] bg-emerald-950 px-6 py-8 text-white shadow-sm sm:px-8">
+                <section className="rounded-4xl bg-emerald-950 px-6 py-8 text-white shadow-sm sm:px-8">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="space-y-3">
                             <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
@@ -224,7 +224,7 @@ export function SavedLibrary() {
                 </section>
 
                 {selectedAyahKey ? (
-                    <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5 sm:p-8">
+                    <section className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5 sm:p-8">
                         <div className="space-y-2">
                             <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
                                 Current ayah
@@ -475,7 +475,7 @@ export function SavedLibrary() {
                             collections.map((collection) => (
                                 <section
                                     key={collection.id}
-                                    className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5"
+                                    className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5"
                                 >
                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                         <div>

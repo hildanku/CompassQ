@@ -26,7 +26,7 @@ export function HistorySection({
     onRetry,
 }: HistorySectionProps) {
     return (
-        <section className="rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
+        <section className="rounded-4xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="space-y-2">
                     <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">

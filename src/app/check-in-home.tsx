@@ -46,9 +46,9 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
 
     if (activeMoment) {
         return (
-            <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#14532d,_#052e16_30%,_#022c22_55%,_#f8fafc_55%,_#ffffff)] px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
+            <main className="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16_30%,#022c22_55%,#f8fafc_55%,#ffffff)] px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
                 <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col gap-6">
-                    <section className="rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
+                    <section className="rounded-4xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                             <div className="space-y-3">
                                 <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -155,9 +155,9 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
     }
 
     return (
-        <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#14532d,_#052e16_30%,_#022c22_55%,_#f8fafc_55%,_#ffffff)] px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
+        <main className="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16_30%,#022c22_55%,#f8fafc_55%,#ffffff)] px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
             <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col justify-between gap-8">
-                <section className="space-y-6 rounded-[2rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
+                <section className="space-y-6 rounded-4xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-emerald-950/15 backdrop-blur sm:p-8">
                     <div className="flex items-start justify-between gap-4">
                         <div className="space-y-3">
                             <p className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
