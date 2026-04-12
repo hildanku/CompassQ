@@ -16,11 +16,14 @@ import {
     removeBookmark,
 } from '@/lib/queries/save-actions'
 
+const savedAtFormatter = new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+})
+
 function formatSavedAt(value: string) {
-    return new Date(value).toLocaleString([], {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    })
+    return `${savedAtFormatter.format(new Date(value))} UTC`
 }
 
 function SavedAyahCard({

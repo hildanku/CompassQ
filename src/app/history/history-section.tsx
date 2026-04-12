@@ -3,6 +3,12 @@ import Link from 'next/link'
 import { checkInCategoryValues } from '@/lib/contracts'
 import { type HistorySession } from '@/lib/queries/moments'
 
+const historyTimestampFormatter = new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+})
+
 const categoryLabels: Record<(typeof checkInCategoryValues)[number], string> = {
     anxiety: 'Anxiety',
     gratitude: 'Gratitude',
@@ -15,10 +21,7 @@ const categoryLabels: Record<(typeof checkInCategoryValues)[number], string> = {
 }
 
 function formatHistoryTimestamp(value: string) {
-    return new Date(value).toLocaleString([], {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    })
+    return `${historyTimestampFormatter.format(new Date(value))} UTC`
 }
 
 type HistorySectionProps = {
