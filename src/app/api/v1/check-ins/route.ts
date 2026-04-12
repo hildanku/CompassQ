@@ -33,6 +33,57 @@ export async function POST(request: Request) {
     }
 
     const localDate = getLocalDateInTimeZone(profile.timezone)
+    const { data: existingCheckIn, error: existingCheckInError } =
+        await auth.supabase
+            .from('check_ins')
+            .select('id, category, created_at, local_date')
+            .eq('user_id', auth.user.id)
+            .eq('local_date', localDate)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+    if (existingCheckInError) {
+        return errorFromStatus(
+            500,
+            "Failed to load today's check-in",
+            requestId,
+        )
+    }
+
+    if (existingCheckIn) {
+        const { data: existingSession, error: existingSessionError } =
+            await auth.supabase
+                .from('sessions')
+                .select('completed')
+                .eq('user_id', auth.user.id)
+                .eq('check_in_id', existingCheckIn.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+
+        if (existingSessionError) {
+            return errorFromStatus(
+                500,
+                "Failed to load today's session",
+                requestId,
+            )
+        }
+
+        return apiSuccess(
+            {
+                checkInId: existingCheckIn.id,
+                category: existingCheckIn.category,
+                createdAt: existingCheckIn.created_at,
+                localDate: existingCheckIn.local_date,
+                reused: true,
+                hasCompletedSession: existingSession?.completed ?? false,
+            },
+            "Today's check-in loaded",
+            { requestId },
+        )
+    }
+
     const payload = {
         user_id: auth.user.id,
         category: parsed.data.category,
@@ -56,6 +107,8 @@ export async function POST(request: Request) {
             category: data.category,
             createdAt: data.created_at,
             localDate: data.local_date,
+            reused: false,
+            hasCompletedSession: false,
         },
         'Check-in created',
         { status: 201, requestId },

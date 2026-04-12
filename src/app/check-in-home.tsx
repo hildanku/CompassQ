@@ -242,6 +242,12 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 : 'Continue'}
                         </button>
 
+                        <p className="text-sm leading-6 text-zinc-500">
+                            CompassQ starts with one primary check-in each day.
+                            If you already started today, we will continue that
+                            Quran Moment.
+                        </p>
+
                         {shouldShowLoadingSkeleton ? (
                             <div className="space-y-4 rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
                                 <div className="animate-pulse space-y-3">

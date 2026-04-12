@@ -152,6 +152,14 @@ export function useCheckInFlow() {
         try {
             const checkIn =
                 await createCheckInMutation.mutateAsync(selectedCategory)
+
+            if (checkIn.reused && checkIn.hasCompletedSession) {
+                setMessage(
+                    "You've already completed today's Quran Moment. Revisit history or come back tomorrow for a new daily check-in.",
+                )
+                return
+            }
+
             const moment = await recommendMomentMutation.mutateAsync(
                 checkIn.checkInId,
             )

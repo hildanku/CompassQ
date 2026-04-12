@@ -40,6 +40,11 @@ type CachedReferenceRow = {
     audio_url: string | null
 }
 
+type SessionRow = {
+    id: string
+    ayah_key: string
+}
+
 async function loadCandidates(
     supabase: RouteSupabaseClient,
     category: CheckInRow['category'],
@@ -217,6 +222,58 @@ export async function POST(request: Request) {
 
     if (!checkIn) {
         return errorFromStatus(404, 'Check-in not found', requestId)
+    }
+
+    const { data: existingSession, error: existingSessionError } =
+        await auth.supabase
+            .from('sessions')
+            .select('id, ayah_key')
+            .eq('user_id', auth.user.id)
+            .eq('check_in_id', checkIn.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+    if (existingSessionError) {
+        return errorFromStatus(
+            500,
+            'Failed to load existing session',
+            requestId,
+        )
+    }
+
+    if (existingSession) {
+        try {
+            const ayah = await resolveAyahPayload(
+                auth.supabase,
+                (existingSession as SessionRow).ayah_key,
+            )
+
+            return apiSuccess(
+                {
+                    sessionId: existingSession.id,
+                    ayah: {
+                        ayahKey: ayah.ayahKey,
+                        surahNumber: ayah.surahNumber,
+                        ayahNumber: ayah.ayahNumber,
+                        arabicText: ayah.arabicText,
+                        translation: ayah.translation,
+                        tafsirSnippet: ayah.tafsirSnippet,
+                        audioUrl: ayah.audioUrl,
+                    },
+                    checkInId: parsed.data.checkInId,
+                },
+                'Existing Quran Moment loaded',
+                { requestId },
+            )
+        } catch (error) {
+            return errorFromStatus(
+                502,
+                'Unable to fetch Quran Moment content right now',
+                requestId,
+                error instanceof Error ? { cause: error.message } : undefined,
+            )
+        }
     }
 
     let candidates: CandidateRow[]

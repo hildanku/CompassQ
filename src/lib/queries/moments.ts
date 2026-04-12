@@ -8,6 +8,8 @@ export type CheckInResponse = {
     category: CheckInCategory
     createdAt: string
     localDate: string
+    reused: boolean
+    hasCompletedSession: boolean
 }
 
 export type RecommendedAyah = {
