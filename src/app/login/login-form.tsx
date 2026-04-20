@@ -57,18 +57,18 @@ export function LoginForm({ next }: LoginFormProps) {
         <div className="w-full max-w-md rounded-3xl border border-emerald-100 bg-white p-8 shadow-sm shadow-emerald-950/5">
             <div className="space-y-2">
                 <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
-                    Masuk ke CompassQ
+                    Sign in to CompassQ
                 </h1>
                 <p className="text-sm leading-6 text-zinc-600">
-                    Lanjutkan dengan email agar kamu bisa menyimpan refleksi,
-                    bookmark ayat, dan melanjutkan perjalananmu kapan pun.
+                    Continue with email so you can save reflections, bookmark
+                    verses, and continue your journey anytime.
                 </p>
             </div>
 
             <form className="mt-8 space-y-4" onSubmit={signInWithMagicLink}>
                 <label className="block space-y-2">
                     <span className="text-sm font-medium text-zinc-800">
-                        Email kamu
+                        Your email
                     </span>
                     <input
                         className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-emerald-500"
@@ -87,8 +87,8 @@ export function LoginForm({ next }: LoginFormProps) {
                     disabled={isSubmitting}
                 >
                     {isSubmitting
-                        ? 'Mengirim link masuk...'
-                        : 'Kirim link masuk'}
+                        ? 'Sending sign-in link...'
+                        : 'Send sign-in link'}
                 </button>
             </form>
 
@@ -99,7 +99,7 @@ export function LoginForm({ next }: LoginFormProps) {
                     onClick={() => signInWithOAuth('google')}
                     disabled={isSubmitting}
                 >
-                    Masuk dengan Google
+                    Sign in with Google
                 </button>
                 <button
                     className="rounded-2xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
@@ -107,7 +107,7 @@ export function LoginForm({ next }: LoginFormProps) {
                     onClick={() => signInWithOAuth('github')}
                     disabled={isSubmitting}
                 >
-                    Masuk dengan GitHub
+                    Sign in with GitHub
                 </button>
             </div>
 

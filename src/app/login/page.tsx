@@ -30,19 +30,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                     </div>
                     <div className="space-y-4">
                         <h1 className="max-w-xl text-5xl font-semibold tracking-tight text-zinc-950 sm:text-6xl">
-                            Kembali ke Quran dari keadaan yang sedang kamu bawa
-                            hari ini.
+                            Return to the Quran from what you are carrying
+                            today.
                         </h1>
                         <p className="max-w-xl text-lg leading-8 text-zinc-600">
-                            CompassQ membantu kamu memulai dari rasa yang sedang
-                            hadir, lalu menemukan ayat yang relevan untuk
-                            dibaca, direnungi, dan disimpan untuk kembali lagi
-                            nanti.
+                            CompassQ helps you start from what you feel right
+                            now, then discover relevant verses to read,
+                            reflect on, and save for later.
                         </p>
                     </div>
                     {error ? (
                         <p className="max-w-md rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                            Proses masuk gagal. Coba ulangi sekali lagi.
+                            Sign-in failed. Please try again.
                         </p>
                     ) : null}
                 </div>
@@ -54,10 +53,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 ) : (
                     <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-8 shadow-sm shadow-amber-950/5">
                         <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
-                            Konfigurasi Supabase belum lengkap
+                            Supabase configuration is incomplete
                         </h2>
                         <p className="mt-3 text-sm leading-6 text-zinc-600">
-                            SETUP ENV NYA
+                            Configure your environment variables first.
                         </p>
                     </div>
                 )}
