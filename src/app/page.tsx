@@ -1,7 +1,5 @@
 import Link from 'next/link'
-
 import { getServerAuth } from '@/lib/auth'
-
 import { CheckInHome } from './check-in-home'
 
 export default async function Home() {
@@ -18,93 +16,87 @@ export default async function Home() {
     }
 
     return (
-        <main className="min-h-screen bg-[linear-gradient(160deg,#022c22,#052e16_45%,#f8fafc_45%,#ffffff)] px-6 py-16 text-zinc-950">
-            <div className="mx-auto flex max-w-6xl flex-col gap-14 lg:flex-row lg:items-end lg:justify-between">
-                <section className="max-w-3xl space-y-8 text-white">
-                    <div className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-2 text-sm font-medium text-emerald-100">
-                        CompassQ
-                    </div>
-                    <div className="space-y-5">
-                        <h1 className="max-w-3xl text-5xl font-semibold tracking-tight sm:text-6xl">
-                            Find a Quran Moment that matches what you are
-                            carrying today.
-                        </h1>
-                        <p className="max-w-2xl text-lg leading-8 text-emerald-50/80">
-                            Start with a simple check-in, continue to a curated
-                            verse, add a short reflection, then save what you
-                            want to revisit. CompassQ is designed to help you
-                            build a closer and more consistent connection with
-                            the Quran.
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                        <Link
-                            href={
-                                isConfigured
-                                    ? user
-                                        ? '/'
-                                        : '/login'
-                                    : '/login'
-                            }
-                            className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-50"
-                        >
-                            {isConfigured
-                                ? user
-                                    ? 'Go to home'
-                                    : 'Sign in to CompassQ'
-                                : 'View setup guide'}
-                        </Link>
-                        <Link
-                            href={
-                                isConfigured && user ? '/protected' : '/login'
-                            }
-                            className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                        >
-                            {isConfigured && user
-                                ? 'Open profile'
-                                : 'View product flow'}
-                        </Link>
-                    </div>
-                    {!isConfigured ? (
-                        <p className="max-w-2xl rounded-2xl border border-amber-300/20 bg-amber-200/10 px-4 py-3 text-sm text-amber-100">
-                            Supabase env variables are missing. Set
-                            `NEXT_PUBLIC_SUPABASE_URL` and
-                            `NEXT_PUBLIC_SUPABASE_ANON_KEY` first so auth can
-                            be used.
-                        </p>
-                    ) : null}
-                </section>
+        <main className="min-h-screen bg-[#052e16]">
+            {/* Hero */}
+            <section className="mx-auto max-w-4xl px-6 pt-14 pb-10">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-emerald-300">
+                    <span className="size-1.5 rounded-full bg-emerald-400" />
+                    CompassQ
+                </div>
 
-                <section className="grid gap-4 rounded-4xl bg-white p-6 shadow-xl shadow-emerald-950/10 sm:grid-cols-3 lg:max-w-2xl">
-                    <article className="rounded-3xl bg-emerald-50 p-5">
-                        <p className="text-sm font-medium text-emerald-700">
-                            Check-in
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-zinc-700">
-                            Begin with a simple question about how you are
-                            showing up today.
-                        </p>
-                    </article>
-                    <article className="rounded-3xl bg-zinc-50 p-5">
-                        <p className="text-sm font-medium text-zinc-900">
-                            Quran Moment
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-zinc-700">
-                            Get curated verses to read, listen to, and reflect
-                            on.
-                        </p>
-                    </article>
-                    <article className="rounded-3xl bg-amber-50 p-5">
-                        <p className="text-sm font-medium text-amber-800">
-                            Save and return
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-zinc-700">
-                            Bookmark, collect, and revisit so your connection
-                            stays strong.
-                        </p>
-                    </article>
-                </section>
-            </div>
+                <h1 className="max-w-2xl text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
+                    Find a Quran moment that matches what you are carrying today.
+                </h1>
+
+                <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-emerald-100/70">
+                    Start with a simple check-in, continue to a curated verse,
+                    add a short reflection, then save what you want to revisit.
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                    <Link
+                        href={isConfigured ? (user ? '/' : '/login') : '/login'}
+                        className="rounded-full bg-white px-5 py-2.5 text-sm font-medium text-emerald-950 transition hover:bg-emerald-50"
+                    >
+                        {isConfigured
+                            ? user
+                                ? 'Go to home'
+                                : 'Sign in to CompassQ'
+                            : 'View setup guide'}
+                    </Link>
+                    <Link
+                        href={isConfigured && user ? '/protected' : '/login'}
+                        className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/10"
+                    >
+                        {isConfigured && user ? 'Open profile' : 'View product flow'}
+                    </Link>
+                </div>
+
+                {!isConfigured && (
+                    <p className="mt-6 max-w-xl rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+                        Supabase env variables are missing. Set{' '}
+                        <code className="font-mono text-amber-100">NEXT_PUBLIC_SUPABASE_URL</code>{' '}
+                        and{' '}
+                        <code className="font-mono text-amber-100">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
+                        first.
+                    </p>
+                )}
+            </section>
+
+            {/* Steps */}
+            <section className="mx-auto max-w-4xl px-6 pb-16">
+                <div className="grid grid-cols-1 gap-px rounded-2xl border border-white/10 bg-white/10 overflow-hidden sm:grid-cols-3">
+                    {[
+                        {
+                            step: '01',
+                            label: 'Check-in',
+                            desc: 'Begin with a simple question about how you are showing up today.',
+                        },
+                        {
+                            step: '02',
+                            label: 'Quran moment',
+                            desc: 'Get curated verses to read, listen to, and reflect on.',
+                        },
+                        {
+                            step: '03',
+                            label: 'Save & return',
+                            desc: 'Bookmark and revisit so your connection stays strong.',
+                        },
+                    ].map(({ step, label, desc }) => (
+                        <div
+                            key={step}
+                            className="bg-white/5 px-5 py-6 backdrop-blur-sm"
+                        >
+                            <p className="mb-2 text-xs font-medium text-emerald-400">
+                                {step} — {label}
+                            </p>
+                            <p className="text-sm leading-relaxed text-emerald-100/60">
+                                {desc}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </section>
         </main>
     )
 }
