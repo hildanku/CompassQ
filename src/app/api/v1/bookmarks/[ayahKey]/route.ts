@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { apiSuccess } from '@/lib/api'
 import { requireApiUser } from '@/lib/api-auth'
 import {
-    errorFromStatus,
+    errorFromUnexpected,
     getRequestId,
     validationErrorJson,
 } from '@/lib/api-route'
+import { removeBookmark } from '@/lib/services/bookmarks'
 
 const routeParamsSchema = z.object({
     ayahKey: z.string().trim().min(1).max(32),
@@ -31,22 +32,21 @@ export async function DELETE(request: Request, context: RouteContext) {
         return validationErrorJson(parsedParams.error, requestId)
     }
 
-    const { error } = await auth.supabase
-        .from('bookmarks')
-        .delete()
-        .eq('user_id', auth.user.id)
-        .eq('ayah_key', parsedParams.data.ayahKey)
+    try {
+        const data = await removeBookmark(
+            {
+                supabase: auth.supabase,
+                userId: auth.user.id,
+            },
+            parsedParams.data.ayahKey,
+        )
 
-    if (error) {
-        return errorFromStatus(500, 'Failed to remove bookmark', requestId)
+        return apiSuccess(data, 'Bookmark removed', { requestId })
+    } catch (error) {
+        return errorFromUnexpected(
+            error,
+            requestId,
+            'Failed to remove bookmark',
+        )
     }
-
-    return apiSuccess(
-        {
-            ayahKey: parsedParams.data.ayahKey,
-            removed: true,
-        },
-        'Bookmark removed',
-        { requestId },
-    )
 }

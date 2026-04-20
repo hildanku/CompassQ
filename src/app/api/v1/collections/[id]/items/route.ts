@@ -3,13 +3,13 @@ import { z } from 'zod'
 import { apiSuccess } from '@/lib/api'
 import { requireApiUser } from '@/lib/api-auth'
 import {
-    errorFromStatus,
-    getDatabaseErrorCode,
+    errorFromUnexpected,
     getRequestId,
     parseJsonBody,
     validationErrorJson,
 } from '@/lib/api-route'
 import { addCollectionItemSchema } from '@/lib/contracts'
+import { addCollectionItem } from '@/lib/services/collections'
 
 const routeParamsSchema = z.object({
     id: z.uuid(),
@@ -44,97 +44,25 @@ export async function POST(request: Request, context: RouteContext) {
         return parsedBody.response
     }
 
-    const { data: collection, error: collectionError } = await auth.supabase
-        .from('collections')
-        .select('id')
-        .eq('id', parsedParams.data.id)
-        .eq('user_id', auth.user.id)
-        .maybeSingle()
-
-    if (collectionError) {
-        return errorFromStatus(500, 'Failed to validate collection', requestId)
-    }
-
-    if (!collection) {
-        return errorFromStatus(404, 'Collection not found', requestId)
-    }
-
-    const { data: ayahReference, error: referenceError } = await auth.supabase
-        .from('quran_references')
-        .select('ayah_key')
-        .eq('ayah_key', parsedBody.data.ayahKey)
-        .maybeSingle()
-
-    if (referenceError) {
-        return errorFromStatus(
-            500,
-            'Failed to validate ayah reference',
-            requestId,
-        )
-    }
-
-    if (!ayahReference) {
-        return errorFromStatus(404, 'Ayah reference not found', requestId)
-    }
-
-    const insertPayload = {
-        collection_id: parsedParams.data.id,
-        ayah_key: parsedBody.data.ayahKey,
-    }
-
-    const { data, error } = await auth.supabase
-        .from('collection_items')
-        .insert(insertPayload)
-        .select('id, collection_id, ayah_key, created_at')
-        .single()
-
-    if (error && getDatabaseErrorCode(error) !== '23505') {
-        return errorFromStatus(500, 'Failed to add collection item', requestId)
-    }
-
-    if (error && getDatabaseErrorCode(error) === '23505') {
-        const { data: existingItem, error: existingItemError } =
-            await auth.supabase
-                .from('collection_items')
-                .select('id, collection_id, ayah_key, created_at')
-                .eq('collection_id', parsedParams.data.id)
-                .eq('ayah_key', parsedBody.data.ayahKey)
-                .single()
-
-        if (existingItemError) {
-            return errorFromStatus(
-                500,
-                'Failed to load existing collection item',
-                requestId,
-            )
-        }
-
-        return apiSuccess(
+    try {
+        const result = await addCollectionItem(
             {
-                collectionItemId: existingItem.id,
-                collectionId: existingItem.collection_id,
-                ayahKey: existingItem.ayah_key,
-                createdAt: existingItem.created_at,
-                created: false,
+                supabase: auth.supabase,
+                userId: auth.user.id,
             },
-            'Collection item already exists',
-            { requestId },
+            parsedParams.data.id,
+            parsedBody.data.ayahKey,
+        )
+
+        return apiSuccess(result.data, result.message, {
+            status: result.status,
+            requestId,
+        })
+    } catch (error) {
+        return errorFromUnexpected(
+            error,
+            requestId,
+            'Failed to add collection item',
         )
     }
-
-    if (!data) {
-        return errorFromStatus(500, 'Failed to add collection item', requestId)
-    }
-
-    return apiSuccess(
-        {
-            collectionItemId: data.id,
-            collectionId: data.collection_id,
-            ayahKey: data.ayah_key,
-            createdAt: data.created_at,
-            created: true,
-        },
-        'Collection item created',
-        { status: 201, requestId },
-    )
 }

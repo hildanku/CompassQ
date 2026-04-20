@@ -1,34 +1,12 @@
 import { apiSuccess } from '@/lib/api'
 import { requireApiUser } from '@/lib/api-auth'
 import {
-    errorFromStatus,
-    getDatabaseErrorCode,
+    errorFromUnexpected,
     getRequestId,
     parseJsonBody,
 } from '@/lib/api-route'
 import { createBookmarkSchema } from '@/lib/contracts'
-
-type BookmarkReferenceRow = {
-    surah_number: number | null
-    ayah_number: number | null
-    arabic_text: string | null
-    translation_text: string | null
-    tafsir_snippet: string | null
-    audio_url: string | null
-}
-
-type BookmarkRow = {
-    id: string
-    ayah_key: string
-    created_at: string
-    quran_references: BookmarkReferenceRow | BookmarkReferenceRow[] | null
-}
-
-function normalizeReference(
-    reference: BookmarkReferenceRow | BookmarkReferenceRow[] | null,
-) {
-    return Array.isArray(reference) ? (reference[0] ?? null) : reference
-}
+import { createBookmark, listBookmarks } from '@/lib/services/bookmarks'
 
 export async function GET(request: Request) {
     const requestId = getRequestId(request)
@@ -38,39 +16,16 @@ export async function GET(request: Request) {
         return auth.response
     }
 
-    const { data, error } = await auth.supabase
-        .from('bookmarks')
-        .select(
-            'id, ayah_key, created_at, quran_references(surah_number, ayah_number, arabic_text, translation_text, tafsir_snippet, audio_url)',
-        )
-        .eq('user_id', auth.user.id)
-        .order('created_at', { ascending: false })
+    try {
+        const data = await listBookmarks({
+            supabase: auth.supabase,
+            userId: auth.user.id,
+        })
 
-    if (error) {
-        return errorFromStatus(500, 'Failed to load bookmarks', requestId)
+        return apiSuccess(data, 'Bookmarks loaded', { requestId })
+    } catch (error) {
+        return errorFromUnexpected(error, requestId, 'Failed to load bookmarks')
     }
-
-    return apiSuccess(
-        {
-            bookmarks: data.map((bookmark: BookmarkRow) => {
-                const reference = normalizeReference(bookmark.quran_references)
-
-                return {
-                    bookmarkId: bookmark.id,
-                    ayahKey: bookmark.ayah_key,
-                    createdAt: bookmark.created_at,
-                    surahNumber: reference?.surah_number,
-                    ayahNumber: reference?.ayah_number,
-                    arabicText: reference?.arabic_text,
-                    translation: reference?.translation_text,
-                    tafsirSnippet: reference?.tafsir_snippet,
-                    audioUrl: reference?.audio_url,
-                }
-            }),
-        },
-        'Bookmarks loaded',
-        { requestId },
-    )
 }
 
 export async function POST(request: Request) {
@@ -87,80 +42,24 @@ export async function POST(request: Request) {
         return parsed.response
     }
 
-    const { data: ayahReference, error: referenceError } = await auth.supabase
-        .from('quran_references')
-        .select('ayah_key')
-        .eq('ayah_key', parsed.data.ayahKey)
-        .maybeSingle()
-
-    if (referenceError) {
-        return errorFromStatus(
-            500,
-            'Failed to validate ayah reference',
-            requestId,
-        )
-    }
-
-    if (!ayahReference) {
-        return errorFromStatus(404, 'Ayah reference not found', requestId)
-    }
-
-    const insertPayload = {
-        user_id: auth.user.id,
-        ayah_key: parsed.data.ayahKey,
-    }
-
-    const { data, error } = await auth.supabase
-        .from('bookmarks')
-        .insert(insertPayload)
-        .select('id, ayah_key, created_at')
-        .single()
-
-    if (error && getDatabaseErrorCode(error) !== '23505') {
-        return errorFromStatus(500, 'Failed to create bookmark', requestId)
-    }
-
-    if (error && getDatabaseErrorCode(error) === '23505') {
-        const { data: existingBookmark, error: existingBookmarkError } =
-            await auth.supabase
-                .from('bookmarks')
-                .select('id, ayah_key, created_at')
-                .eq('user_id', auth.user.id)
-                .eq('ayah_key', parsed.data.ayahKey)
-                .single()
-
-        if (existingBookmarkError) {
-            return errorFromStatus(
-                500,
-                'Failed to load existing bookmark',
-                requestId,
-            )
-        }
-
-        return apiSuccess(
+    try {
+        const result = await createBookmark(
             {
-                bookmarkId: existingBookmark.id,
-                ayahKey: existingBookmark.ayah_key,
-                createdAt: existingBookmark.created_at,
-                created: false,
+                supabase: auth.supabase,
+                userId: auth.user.id,
             },
-            'Bookmark already exists',
-            { requestId },
+            parsed.data.ayahKey,
+        )
+
+        return apiSuccess(result.data, result.message, {
+            status: result.status,
+            requestId,
+        })
+    } catch (error) {
+        return errorFromUnexpected(
+            error,
+            requestId,
+            'Failed to create bookmark',
         )
     }
-
-    if (!data) {
-        return errorFromStatus(500, 'Failed to create bookmark', requestId)
-    }
-
-    return apiSuccess(
-        {
-            bookmarkId: data.id,
-            ayahKey: data.ayah_key,
-            createdAt: data.created_at,
-            created: true,
-        },
-        'Bookmark created',
-        { status: 201, requestId },
-    )
 }

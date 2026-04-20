@@ -2,6 +2,7 @@ import type { ZodType } from 'zod'
 import { ZodError } from 'zod'
 
 import { apiError, createRequestId, type ApiErrorCode } from '@/lib/api'
+import { isServiceError } from '@/lib/services/error'
 
 type ValidationIssue = {
     path: string
@@ -108,4 +109,26 @@ export function getDatabaseErrorCode(error: unknown) {
     const code = Reflect.get(error, 'code')
 
     return typeof code === 'string' ? code : null
+}
+
+export function errorFromUnexpected(
+    error: unknown,
+    requestId: string,
+    fallbackMessage = 'Unexpected error',
+) {
+    if (isServiceError(error)) {
+        return errorFromStatus(
+            error.status,
+            error.message,
+            requestId,
+            error.details,
+        )
+    }
+
+    return errorFromStatus(
+        500,
+        fallbackMessage,
+        requestId,
+        error instanceof Error ? { cause: error.message } : undefined,
+    )
 }
