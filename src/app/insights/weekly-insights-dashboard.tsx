@@ -1,10 +1,10 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
 import { useState } from 'react'
 
 import { ApiClientError } from '@/lib/api'
+import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import { addDaysToIsoDate, formatUtcDateRange } from '@/lib/utils'
 import {
     fetchWeeklyInsights,
@@ -27,38 +27,21 @@ export function WeeklyInsightsDashboard({
 
     return (
         <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
-            <div className="mx-auto flex max-w-5xl flex-col gap-8">
+            <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-28">
                 <section className="rounded-4xl bg-emerald-950 px-6 py-8 text-white shadow-sm sm:px-8">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div className="space-y-3">
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
-                                Weekly recap
-                            </p>
-                            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                                See how often you returned this week.
-                            </h1>
-                            <p className="max-w-3xl text-sm leading-7 text-emerald-50/85 sm:text-base">
-                                CompassQ turns individual sessions into a weekly
-                                pattern you can actually revisit: return days,
-                                reflection volume, top categories, and ayah that
-                                kept surfacing.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3 text-sm">
-                            <Link
-                                href="/history"
-                                className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10"
-                            >
-                                History
-                            </Link>
-                            <Link
-                                href="/saved"
-                                className="rounded-full bg-white px-4 py-2 font-medium text-emerald-950 transition hover:bg-emerald-50"
-                            >
-                                Saved library
-                            </Link>
-                        </div>
+                    <div className="space-y-3">
+                        <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
+                            Weekly recap
+                        </p>
+                        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                            See how often you returned this week.
+                        </h1>
+                        <p className="max-w-3xl text-sm leading-7 text-emerald-50/85 sm:text-base">
+                            CompassQ turns individual sessions into a weekly
+                            pattern you can actually revisit: return days,
+                            reflection volume, top categories, and ayah that
+                            kept surfacing.
+                        </p>
                     </div>
                 </section>
 
@@ -248,6 +231,8 @@ export function WeeklyInsightsDashboard({
                     ) : null}
                 </section>
             </div>
+
+            <AppBottomNav />
         </main>
     )
 }

@@ -1,6 +1,5 @@
-import Link from 'next/link'
-
 import { requireUser } from '@/lib/auth'
+import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import { formatUtcTimestamp } from '@/lib/utils'
 
 import { ProfileForm } from './profile-form'
@@ -15,7 +14,7 @@ export default async function ProtectedPage() {
 
     return (
         <main className="min-h-screen bg-zinc-50 px-6 py-12">
-            <div className="mx-auto flex max-w-4xl flex-col gap-8">
+            <div className="mx-auto flex max-w-4xl flex-col gap-8 pb-28">
                 <header className="rounded-3xl bg-emerald-950 px-8 py-10 text-white shadow-sm">
                     <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
                         Protected route
@@ -83,34 +82,9 @@ export default async function ProtectedPage() {
                         />
                     </div>
                 </section>
-
-                <div className="flex flex-wrap gap-3 text-sm">
-                    <Link
-                        href="/insights"
-                        className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
-                    >
-                        Weekly recap
-                    </Link>
-                    <Link
-                        href="/history"
-                        className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
-                    >
-                        History
-                    </Link>
-                    <Link
-                        href="/saved"
-                        className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
-                    >
-                        Saved library
-                    </Link>
-                    <Link
-                        href="/"
-                        className="rounded-full border border-zinc-200 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-100"
-                    >
-                        Back home
-                    </Link>
-                </div>
             </div>
+
+            <AppBottomNav />
         </main>
     )
 }
