@@ -7,6 +7,7 @@ import { HistorySection } from '@/app/history/history-section'
 import { CheckInAudioPlayer } from '@/app/check-in/check-in-audio-player'
 import { ReflectionSection } from '@/app/check-in/reflection-section'
 import { SaveActions } from '@/app/check-in/save-actions'
+import { LogoutButton } from '@/app/logout-button'
 import { useCheckInFlow } from '@/app/check-in/use-check-in-flow'
 import { ApiClientError } from '@/lib/api'
 import { checkInCategoryLabels } from '@/lib/constant'
@@ -69,13 +70,16 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 </div>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={handleStartAnotherCheckIn}
-                                className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
-                            >
-                                Start another check-in
-                            </button>
+                            <div className="flex flex-wrap gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleStartAnotherCheckIn}
+                                    className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                                >
+                                    Start another check-in
+                                </button>
+                                <LogoutButton className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60" />
+                            </div>
                         </div>
 
                         <div className="mt-6 space-y-5 rounded-[1.75rem] bg-zinc-50 p-5 sm:p-6">
@@ -194,6 +198,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             >
                                 Weekly recap
                             </Link>
+                            <LogoutButton className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60" />
                         </div>
                     </div>
 

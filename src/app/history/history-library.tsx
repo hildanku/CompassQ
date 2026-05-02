@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
+import { LogoutButton } from '@/app/logout-button'
 import { ApiClientError } from '@/lib/api'
 import { fetchHistory, historyQueryKey } from '@/lib/queries/moments'
 
@@ -52,6 +53,7 @@ export function HistoryLibrary() {
                             >
                                 Saved library
                             </Link>
+                            <LogoutButton className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60" />
                         </div>
                     </div>
                 </section>
