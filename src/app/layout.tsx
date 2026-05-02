@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 
-import { NetworkStatusToast } from '@/app/network-status-toast'
-import { QueryProvider } from '@/app/query-provider'
+import { AuthenticatedSessionChrome } from '@/lib/ui/authenticated-session-chrome'
+import { NetworkStatusToast } from '@/lib/ui/network-status-toast'
+import { QueryProvider } from '@/lib/ui/query-provider'
 
 import './globals.css'
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         >
             <body className="min-h-full flex flex-col">
                 <QueryProvider>
+                    <AuthenticatedSessionChrome />
                     {children}
                     <NetworkStatusToast />
                 </QueryProvider>

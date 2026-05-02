@@ -6,21 +6,21 @@ import { useFormStatus } from 'react-dom'
 import { logout } from '@/app/actions/auth'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
-type LogoutButtonProps = {
-    className: string
-}
-
-function SubmitButton({ className }: LogoutButtonProps) {
+function SubmitButton() {
     const { pending } = useFormStatus()
 
     return (
-        <button className={className} type="submit" disabled={pending}>
+        <button
+            className="rounded-full border border-white/15 bg-zinc-950/90 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-zinc-950/15 backdrop-blur transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-60"
+            type="submit"
+            disabled={pending}
+        >
             {pending ? 'Signing out...' : 'Log out'}
         </button>
     )
 }
 
-export function LogoutButton({ className }: LogoutButtonProps) {
+export function LogoutButton() {
     const queryClient = useQueryClient()
     const supabase = createBrowserSupabaseClient()
 
@@ -34,7 +34,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
                 })
             }}
         >
-            <SubmitButton className={className} />
+            <SubmitButton />
         </form>
     )
 }

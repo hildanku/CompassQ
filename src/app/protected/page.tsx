@@ -1,6 +1,5 @@
 import Link from 'next/link'
 
-import { LogoutButton } from '@/app/logout-button'
 import { requireUser } from '@/lib/auth'
 import { formatUtcTimestamp } from '@/lib/utils'
 
@@ -18,23 +17,17 @@ export default async function ProtectedPage() {
         <main className="min-h-screen bg-zinc-50 px-6 py-12">
             <div className="mx-auto flex max-w-4xl flex-col gap-8">
                 <header className="rounded-3xl bg-emerald-950 px-8 py-10 text-white shadow-sm">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
-                                Protected route
-                            </p>
-                            <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-                                Session handling is active.
-                            </h1>
-                            <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-50/85">
-                                This page only renders for authenticated users.
-                                If no session is present, Next.js returns a 401
-                                via the auth guard.
-                            </p>
-                        </div>
-
-                        <LogoutButton className="rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60" />
-                    </div>
+                    <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
+                        Protected route
+                    </p>
+                    <h1 className="mt-3 text-4xl font-semibold tracking-tight">
+                        Session handling is active.
+                    </h1>
+                    <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-50/85">
+                        This page only renders for authenticated users. If no
+                        session is present, Next.js returns a 401 via the auth
+                        guard.
+                    </p>
                 </header>
 
                 <section className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">

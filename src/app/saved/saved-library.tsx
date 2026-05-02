@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
-import { LogoutButton } from '@/app/logout-button'
 import { ApiClientError } from '@/lib/api'
 import {
     addCollectionItem,
@@ -220,7 +219,6 @@ export function SavedLibrary() {
                             >
                                 Profile
                             </Link>
-                            <LogoutButton className="rounded-full border border-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60" />
                         </div>
                     </div>
                 </section>
