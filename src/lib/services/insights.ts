@@ -8,10 +8,10 @@ type CheckInCategory = (typeof checkInCategoryValues)[number]
 type SessionInsightRow = {
     id: string
     ayah_key: string
-    check_ins: Array<{
+    check_ins: {
         local_date: string
         category: CheckInCategory
-    }>
+    } | null
 }
 
 function sortEntriesByCount<T extends { count: number }>(entries: T[]) {
@@ -39,7 +39,7 @@ export async function getWeeklyInsights(
     const typedSessions = (sessions ?? []) as unknown as SessionInsightRow[]
     const returnDays = new Set(
         typedSessions
-            .map((session) => session.check_ins[0]?.local_date)
+            .map((session) => session.check_ins?.local_date)
             .filter((value): value is string => Boolean(value)),
     ).size
 
@@ -47,7 +47,7 @@ export async function getWeeklyInsights(
     const ayahCounts = new Map<string, number>()
 
     for (const session of typedSessions) {
-        const category = session.check_ins[0]?.category
+        const category = session.check_ins?.category
 
         if (category) {
             categoryCounts.set(

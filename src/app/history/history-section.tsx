@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { checkInCategoryLabels } from '@/lib/constant'
+import { getAyahReference } from '@/lib/quran'
 import { type HistorySession } from '@/lib/queries/moments'
 import { formatUtcTimestamp } from '@/lib/utils'
 
@@ -13,6 +14,14 @@ type HistorySectionProps = {
     actionHref?: string
     actionLabel?: string
     onRetry?: () => void
+}
+
+function getCategoryLabel(category: HistorySession['category']) {
+    if (!category) {
+        return 'Quran Moment'
+    }
+
+    return checkInCategoryLabels[category] ?? 'Quran Moment'
 }
 
 export function HistorySection({
@@ -80,57 +89,69 @@ export function HistorySection({
 
             {!isLoading && !message && sessions.length > 0 ? (
                 <div className="mt-5 grid gap-4">
-                    {sessions.map((session) => (
-                        <article
-                            key={session.sessionId}
-                            className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
-                        >
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-zinc-500">
-                                        {session.category
-                                            ? checkInCategoryLabels[
-                                                  session.category
-                                              ]
-                                            : 'Unknown category'}
-                                    </p>
-                                    <h3 className="text-lg font-semibold text-zinc-950">
-                                        Ayah {session.ayahKey}
-                                    </h3>
-                                </div>
-                                <div className="text-right text-sm text-zinc-500">
-                                    <p>
-                                        {formatUtcTimestamp(session.createdAt)}
-                                    </p>
-                                    <p>
-                                        {session.completed
-                                            ? 'Completed'
-                                            : 'In progress'}
-                                    </p>
-                                </div>
-                            </div>
+                    {sessions.map((session) => {
+                        const ayahReference = getAyahReference(session.ayahKey)
 
-                            <div className="mt-4 rounded-3xl bg-white p-4 text-sm leading-6 text-zinc-700">
-                                <p className="font-medium text-zinc-900">
-                                    Latest reflection
-                                </p>
-                                <p className="mt-2">
-                                    {session.latestReflection
-                                        ? session.latestReflection.content ||
-                                          'Empty reflection saved.'
-                                        : 'No reflection saved for this session yet.'}
-                                </p>
-                            </div>
+                        return (
+                            <article
+                                key={session.sessionId}
+                                className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
+                            >
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-zinc-500">
+                                            {getCategoryLabel(session.category)}
+                                        </p>
+                                        <h3 className="text-lg font-semibold text-zinc-950">
+                                            {ayahReference
+                                                ? `Surah ${ayahReference.surahName}, Ayah ${ayahReference.ayahNumber}`
+                                                : `Ayah ${session.ayahKey}`}
+                                        </h3>
+                                        {ayahReference ? (
+                                            <p className="text-sm text-zinc-500">
+                                                {ayahReference.surahNumber}:
+                                                {ayahReference.ayahNumber}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                    <div className="text-right text-sm text-zinc-500">
+                                        <p>
+                                            {formatUtcTimestamp(
+                                                session.createdAt,
+                                            )}
+                                        </p>
+                                        <p>
+                                            {session.completed
+                                                ? 'Completed'
+                                                : 'In progress'}
+                                        </p>
+                                    </div>
+                                </div>
 
-                            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                                <p>
-                                    {session.reflectionCount} reflection
-                                    {session.reflectionCount === 1 ? '' : 's'}
-                                </p>
-                                <p>Session {session.sessionId}</p>
-                            </div>
-                        </article>
-                    ))}
+                                <div className="mt-4 rounded-3xl bg-white p-4 text-sm leading-6 text-zinc-700">
+                                    <p className="font-medium text-zinc-900">
+                                        Latest reflection
+                                    </p>
+                                    <p className="mt-2">
+                                        {session.latestReflection
+                                            ? session.latestReflection
+                                                  .content ||
+                                              'Empty reflection saved.'
+                                            : 'No reflection saved for this session yet.'}
+                                    </p>
+                                </div>
+
+                                <div className="mt-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+                                    <p>
+                                        {session.reflectionCount} reflection
+                                        {session.reflectionCount === 1
+                                            ? ''
+                                            : 's'}
+                                    </p>
+                                </div>
+                            </article>
+                        )
+                    })}
                 </div>
             ) : null}
         </section>

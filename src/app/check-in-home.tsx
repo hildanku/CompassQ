@@ -12,6 +12,7 @@ import { useCheckInFlow } from '@/app/check-in/use-check-in-flow'
 import { ApiClientError } from '@/lib/api'
 import { checkInCategoryLabels } from '@/lib/constant'
 import { checkInCategoryValues } from '@/lib/contracts'
+import { getSurahName } from '@/lib/quran'
 import { fetchHistory, historyQueryKey } from '@/lib/queries/moments'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 
@@ -186,6 +187,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
     } = useCheckInFlow()
 
     if (activeMoment) {
+        const surahName = getSurahName(activeMoment.ayah.surahNumber)
+
         return (
             <main className="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16_30%,#022c22_55%,#f8fafc_55%,#ffffff)] px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
                 <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col gap-6 pb-28">
@@ -225,8 +228,11 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         <div className="mt-6 space-y-5 rounded-[1.75rem] bg-zinc-50 p-5 sm:p-6">
                             <div className="space-y-2">
                                 <p className="text-sm font-medium text-zinc-500">
-                                    Ayah {activeMoment.ayah.ayahKey}
+                                    {surahName} {activeMoment.ayah.ayahKey}
                                 </p>
+                                <h2 className="text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
+                                    {`Surah ${surahName}, Ayah ${activeMoment.ayah.ayahNumber}`}
+                                </h2>
                                 <p
                                     className="text-right text-3xl leading-loose text-zinc-950 sm:text-4xl"
                                     dir="rtl"
@@ -265,11 +271,6 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 ayahKey={activeMoment.ayah.ayahKey}
                                 audioUrl={activeMoment.ayah.audioUrl}
                             />
-                        </div>
-
-                        <div className="mt-5 grid gap-3 rounded-3xl border border-dashed border-zinc-200 bg-white p-4 text-sm text-zinc-600 sm:grid-cols-2">
-                            <p>Check-in ID: {activeMoment.checkInId}</p>
-                            <p>Session ID: {activeMoment.sessionId}</p>
                         </div>
 
                         <SaveActions ayahKey={activeMoment.ayah.ayahKey} />

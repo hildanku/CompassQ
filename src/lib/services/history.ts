@@ -6,9 +6,9 @@ type SessionRow = {
     ayah_key: string
     completed: boolean
     created_at: string
-    check_ins: Array<{
+    check_ins: {
         category: string
-    }>
+    } | null
 }
 
 type ReflectionRow = {
@@ -69,7 +69,7 @@ export async function getHistory(
             return {
                 sessionId: session.id,
                 ayahKey: session.ayah_key,
-                category: session.check_ins[0]?.category ?? null,
+                category: session.check_ins?.category ?? null,
                 completed: session.completed,
                 createdAt: session.created_at,
                 reflectionCount: reflectionCountBySession.get(session.id) ?? 0,
