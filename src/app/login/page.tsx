@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { getServerAuth } from '@/lib/auth'
-
-import { LoginForm } from './login-form'
+import { LoginForm } from '@/lib/ui/login/login-form'
 
 type LoginPageProps = {
     searchParams: Promise<{
@@ -35,8 +34,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                         </h1>
                         <p className="max-w-xl text-lg leading-8 text-zinc-600">
                             CompassQ helps you start from what you feel right
-                            now, then discover relevant verses to read,
-                            reflect on, and save for later.
+                            now, then discover relevant verses to read, reflect
+                            on, and save for later.
                         </p>
                     </div>
                     {error ? (

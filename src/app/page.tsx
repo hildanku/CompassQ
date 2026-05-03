@@ -1,6 +1,7 @@
 import Link from 'next/link'
+
 import { getServerAuth } from '@/lib/auth'
-import { CheckInHome } from './check-in-home'
+import { CheckInHome } from '@/lib/ui/home/check-in-home'
 
 export default async function Home() {
     const { supabase, user, isConfigured } = await getServerAuth()

@@ -1,6 +1,5 @@
 import { requireUser } from '@/lib/auth'
-
-import { HistoryLibrary } from './history-library'
+import { HistoryLibrary } from '@/lib/ui/history/history-library'
 
 export default async function HistoryPage() {
     await requireUser()

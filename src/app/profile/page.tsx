@@ -1,9 +1,8 @@
 import { requireUser } from '@/lib/auth'
+import { ProfileForm } from '@/lib/ui/profile/profile-form'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import { LogoutButton } from '@/lib/ui/logout-button'
 import { formatUtcTimestamp } from '@/lib/utils'
-
-import { ProfileForm } from './profile-form'
 
 export default async function ProfilePage() {
     const { supabase, user } = await requireUser()

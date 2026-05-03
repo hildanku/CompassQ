@@ -4,17 +4,18 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Drawer } from 'vaul'
 
-import { HistorySection } from '@/app/history/history-section'
-import { CheckInAudioPlayer } from '@/app/check-in/check-in-audio-player'
-import { ReflectionSection } from '@/app/check-in/reflection-section'
-import { SaveActions } from '@/app/check-in/save-actions'
-import { useCheckInFlow } from '@/app/check-in/use-check-in-flow'
 import { ApiClientError } from '@/lib/api'
 import { checkInCategoryLabels } from '@/lib/constant'
 import { checkInCategoryValues } from '@/lib/contracts'
 import { getSurahName } from '@/lib/quran'
 import { fetchHistory, historyQueryKey } from '@/lib/queries/moments'
+import { HistorySection } from '@/lib/ui/history/history-section'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
+
+import { CheckInAudioPlayer } from './check-in-audio-player'
+import { ReflectionSection } from './reflection-section'
+import { SaveActions } from './save-actions'
+import { useCheckInFlow } from './use-check-in-flow'
 
 type CheckInHomeProps = {
     displayName: string | null

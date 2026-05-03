@@ -1,7 +1,6 @@
 import { requireUser } from '@/lib/auth'
+import { WeeklyInsightsDashboard } from '@/lib/ui/insights/weekly-insights-dashboard'
 import { getCurrentWeekStartInTimeZone } from '@/lib/utils'
-
-import { WeeklyInsightsDashboard } from './weekly-insights-dashboard'
 
 export default async function InsightsPage() {
     const { supabase, user } = await requireUser()
