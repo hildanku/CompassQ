@@ -25,7 +25,8 @@ export default async function Home() {
                 </div>
 
                 <h1 className="max-w-2xl text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
-                    Find a Quran moment that matches what you are carrying today.
+                    Find a Quran moment that matches what you are carrying
+                    today.
                 </h1>
 
                 <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-emerald-100/70">
@@ -45,19 +46,25 @@ export default async function Home() {
                             : 'View setup guide'}
                     </Link>
                     <Link
-                        href={isConfigured && user ? '/protected' : '/login'}
+                        href={isConfigured && user ? '/profile' : '/login'}
                         className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/10"
                     >
-                        {isConfigured && user ? 'Open profile' : 'View product flow'}
+                        {isConfigured && user
+                            ? 'Open profile'
+                            : 'View product flow'}
                     </Link>
                 </div>
 
                 {!isConfigured && (
                     <p className="mt-6 max-w-xl rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
                         Supabase env variables are missing. Set{' '}
-                        <code className="font-mono text-amber-100">NEXT_PUBLIC_SUPABASE_URL</code>{' '}
+                        <code className="font-mono text-amber-100">
+                            NEXT_PUBLIC_SUPABASE_URL
+                        </code>{' '}
                         and{' '}
-                        <code className="font-mono text-amber-100">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
+                        <code className="font-mono text-amber-100">
+                            NEXT_PUBLIC_SUPABASE_ANON_KEY
+                        </code>{' '}
                         first.
                     </p>
                 )}

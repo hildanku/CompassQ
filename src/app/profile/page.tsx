@@ -1,10 +1,11 @@
 import { requireUser } from '@/lib/auth'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
+import { LogoutButton } from '@/lib/ui/logout-button'
 import { formatUtcTimestamp } from '@/lib/utils'
 
 import { ProfileForm } from './profile-form'
 
-export default async function ProtectedPage() {
+export default async function ProfilePage() {
     const { supabase, user } = await requireUser()
     const { data: profile } = await supabase
         .from('profiles')
@@ -17,15 +18,15 @@ export default async function ProtectedPage() {
             <div className="mx-auto flex max-w-4xl flex-col gap-8 pb-28">
                 <header className="rounded-3xl bg-emerald-950 px-8 py-10 text-white shadow-sm">
                     <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
-                        Protected route
+                        Profile
                     </p>
                     <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-                        Session handling is active.
+                        Keep your CompassQ details up to date.
                     </h1>
                     <p className="mt-4 max-w-2xl text-base leading-7 text-emerald-50/85">
-                        This page only renders for authenticated users. If no
-                        session is present, Next.js returns a 401 via the auth
-                        guard.
+                        Update the name and timezone that shape your daily
+                        check-ins, so each Quran Moment stays tied to the right
+                        context for you.
                     </p>
                 </header>
 
@@ -65,12 +66,12 @@ export default async function ProtectedPage() {
                     <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5">
                         <div className="mb-5 space-y-2">
                             <h2 className="text-xl font-semibold text-zinc-950">
-                                Profile foundation
+                                Profile settings
                             </h2>
                             <p className="text-sm leading-6 text-zinc-600">
-                                `profiles` is created automatically on first
-                                login, then you can keep `display_name` and
-                                `timezone` up to date here.
+                                Set the display name and timezone CompassQ uses
+                                when saving your profile and daily check-in
+                                rhythm.
                             </p>
                         </div>
 
@@ -80,6 +81,16 @@ export default async function ProtectedPage() {
                                 timezone: profile?.timezone ?? 'UTC',
                             }}
                         />
+
+                        <div className="mt-6 border-t border-zinc-200 pt-5">
+                            <p className="text-sm leading-6 text-zinc-600">
+                                Need to leave this device? Sign out from your
+                                profile here.
+                            </p>
+                            <div className="mt-4">
+                                <LogoutButton />
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>

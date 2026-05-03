@@ -37,10 +37,10 @@ const navItems: NavItem[] = [
         isActive: (pathname) => pathname.startsWith('/insights'),
     },
     {
-        href: '/protected',
+        href: '/profile',
         label: 'Profile',
         icon: UserRound,
-        isActive: (pathname) => pathname.startsWith('/protected'),
+        isActive: (pathname) => pathname.startsWith('/profile'),
     },
 ]
 

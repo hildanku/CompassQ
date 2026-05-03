@@ -214,7 +214,7 @@ export function SavedLibrary() {
                                 Back home
                             </Link>
                             <Link
-                                href="/protected"
+                                href="/profile"
                                 className="rounded-full bg-white px-4 py-2 font-medium text-emerald-950 transition hover:bg-emerald-50"
                             >
                                 Profile
