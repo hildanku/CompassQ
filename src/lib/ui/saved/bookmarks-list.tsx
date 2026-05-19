@@ -33,11 +33,11 @@ export function BookmarksList({
             </div>
 
             {isLoading ? (
-                <div className="rounded-3xl bg-white p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(236,253,245,0.72))] p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
                     Loading bookmarks...
                 </div>
             ) : errorMessage ? (
-                <div className="rounded-3xl border border-amber-200 bg-white p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fef3c7_100%)] p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
                     <p>{errorMessage}</p>
                     <button
                         type="button"
@@ -48,7 +48,7 @@ export function BookmarksList({
                     </button>
                 </div>
             ) : bookmarks.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-zinc-200 bg-white p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-dashed border-emerald-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(244,244,245,0.9))] p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">
                     No bookmarks yet. Save an ayah from the Quran Moment screen
                     and it will appear here.
                 </div>
@@ -60,7 +60,7 @@ export function BookmarksList({
                             type="button"
                             onClick={() => onRemoveBookmark(bookmark.ayahKey)}
                             disabled={isRemovingBookmark}
-                            className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-full border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,250,249,0.98))] px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-emerald-200 hover:bg-emerald-50/80 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             Remove bookmark
                         </button>

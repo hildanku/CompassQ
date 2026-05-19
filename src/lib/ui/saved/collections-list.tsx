@@ -30,11 +30,11 @@ export function CollectionsList({
             </div>
 
             {isLoading ? (
-                <div className="rounded-3xl bg-white p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(236,253,245,0.72))] p-5 text-sm text-zinc-600 shadow-sm shadow-zinc-950/5">
                     Loading collections...
                 </div>
             ) : errorMessage ? (
-                <div className="rounded-3xl border border-amber-200 bg-white p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fef3c7_100%)] p-5 text-sm text-amber-900 shadow-sm shadow-zinc-950/5">
                     <p>{errorMessage}</p>
                     <button
                         type="button"
@@ -45,7 +45,7 @@ export function CollectionsList({
                     </button>
                 </div>
             ) : collections.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-zinc-200 bg-white p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">
+                <div className="rounded-3xl border border-dashed border-emerald-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(244,244,245,0.9))] p-5 text-sm leading-6 text-zinc-600 shadow-sm shadow-zinc-950/5">
                     No collections yet. Start one for ayah you want to revisit
                     in groups.
                 </div>
@@ -53,7 +53,7 @@ export function CollectionsList({
                 collections.map((collection) => (
                     <section
                         key={collection.id}
-                        className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5"
+                        className="rounded-4xl border border-white/70 bg-white/88 p-6 shadow-xl shadow-emerald-950/8 backdrop-blur-xl"
                     >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
@@ -65,7 +65,7 @@ export function CollectionsList({
                                     {formatUtcTimestamp(collection.createdAt)}
                                 </p>
                             </div>
-                            <p className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-zinc-600">
+                            <p className="rounded-full border border-emerald-100/80 bg-emerald-50/90 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
                                 {collection.itemCount} item
                                 {collection.itemCount === 1 ? '' : 's'}
                             </p>

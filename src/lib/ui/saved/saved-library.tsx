@@ -13,11 +13,15 @@ import {
     fetchCollections,
     removeBookmark,
 } from '@/lib/queries/save-actions'
+import {
+    AuthenticatedPageHeader,
+    AuthenticatedPageShell,
+} from '@/lib/ui/authenticated-page-shell'
+import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
 
 import { BookmarksList } from './bookmarks-list'
 import { CollectionsList } from './collections-list'
-import { SavedPageHero } from './saved-page-hero'
 import { SelectedAyahCollectionPanel } from './selected-ayah-collection-panel'
 
 export function SavedLibrary() {
@@ -150,53 +154,55 @@ export function SavedLibrary() {
     }
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
-            <div className="mx-auto flex max-w-6xl flex-col gap-8">
-                <SavedPageHero />
+        <AuthenticatedPageShell width="wide">
+            <AuthenticatedPageHeader
+                eyebrow="Saved"
+                title="Bookmark quickly, then organize deliberately."
+                description="Keep ayah you want to revisit close at hand, then sort them into collections when a pattern starts to form."
+            />
 
-                <FeedbackMessage feedback={feedback.value} />
+            <FeedbackMessage feedback={feedback.value} />
 
-                {selectedAyahKey ? (
-                    <SelectedAyahCollectionPanel
-                        selectedAyahKey={selectedAyahKey}
-                        selectedAyahAlreadySaved={selectedAyahAlreadySaved}
-                        collections={collections}
-                        isLoadingCollections={collectionsQuery.isLoading}
-                        collectionsErrorMessage={collectionsErrorMessage}
-                        isAddingToCollection={addToCollectionMutation.isPending}
-                        isCreatingCollection={
-                            createCollectionMutation.isPending
-                        }
-                        onRetryCollections={() => {
-                            void collectionsQuery.refetch()
-                        }}
-                        onAddToCollection={handleAddToCollection}
-                        onCreateCollection={handleCreateCollection}
-                    />
-                ) : null}
+            {selectedAyahKey ? (
+                <SelectedAyahCollectionPanel
+                    selectedAyahKey={selectedAyahKey}
+                    selectedAyahAlreadySaved={selectedAyahAlreadySaved}
+                    collections={collections}
+                    isLoadingCollections={collectionsQuery.isLoading}
+                    collectionsErrorMessage={collectionsErrorMessage}
+                    isAddingToCollection={addToCollectionMutation.isPending}
+                    isCreatingCollection={createCollectionMutation.isPending}
+                    onRetryCollections={() => {
+                        void collectionsQuery.refetch()
+                    }}
+                    onAddToCollection={handleAddToCollection}
+                    onCreateCollection={handleCreateCollection}
+                />
+            ) : null}
 
-                <section className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr]">
-                    <BookmarksList
-                        bookmarks={bookmarks}
-                        isLoading={bookmarksQuery.isLoading}
-                        errorMessage={bookmarksErrorMessage}
-                        isRemovingBookmark={removeBookmarkMutation.isPending}
-                        onRetry={() => {
-                            void bookmarksQuery.refetch()
-                        }}
-                        onRemoveBookmark={handleRemoveBookmark}
-                    />
+            <section className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr]">
+                <BookmarksList
+                    bookmarks={bookmarks}
+                    isLoading={bookmarksQuery.isLoading}
+                    errorMessage={bookmarksErrorMessage}
+                    isRemovingBookmark={removeBookmarkMutation.isPending}
+                    onRetry={() => {
+                        void bookmarksQuery.refetch()
+                    }}
+                    onRemoveBookmark={handleRemoveBookmark}
+                />
 
-                    <CollectionsList
-                        collections={collections}
-                        isLoading={collectionsQuery.isLoading}
-                        errorMessage={collectionsErrorMessage}
-                        onRetry={() => {
-                            void collectionsQuery.refetch()
-                        }}
-                    />
-                </section>
-            </div>
-        </main>
+                <CollectionsList
+                    collections={collections}
+                    isLoading={collectionsQuery.isLoading}
+                    errorMessage={collectionsErrorMessage}
+                    onRetry={() => {
+                        void collectionsQuery.refetch()
+                    }}
+                />
+            </section>
+
+            <AppBottomNav />
+        </AuthenticatedPageShell>
     )
 }

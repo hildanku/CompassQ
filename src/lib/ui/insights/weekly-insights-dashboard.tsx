@@ -5,6 +5,10 @@ import { useState } from 'react'
 
 import { ApiClientError } from '@/lib/api'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
+import {
+    AuthenticatedPageHeader,
+    AuthenticatedPageShell,
+} from '@/lib/ui/authenticated-page-shell'
 import { addDaysToIsoDate, formatUtcDateRange } from '@/lib/utils'
 import {
     fetchWeeklyInsights,
@@ -26,213 +30,190 @@ export function WeeklyInsightsDashboard({
     const weeklyInsights = weeklyInsightsQuery.data
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 sm:py-10">
-            <div className="mx-auto flex max-w-5xl flex-col gap-8 pb-28">
-                <section className="rounded-4xl bg-emerald-950 px-6 py-8 text-white shadow-sm sm:px-8">
-                    <div className="space-y-3">
-                        <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-200">
-                            Weekly recap
-                        </p>
-                        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                            See how often you returned this week.
-                        </h1>
-                        <p className="max-w-3xl text-sm leading-7 text-emerald-50/85 sm:text-base">
-                            CompassQ turns individual sessions into a weekly
-                            pattern you can actually revisit: return days,
-                            reflection volume, top categories, and ayah that
-                            kept surfacing.
-                        </p>
-                    </div>
-                </section>
+        <AuthenticatedPageShell>
+            <AuthenticatedPageHeader
+                eyebrow="Weekly recap"
+                title="See how often you returned this week."
+                description="CompassQ turns individual sessions into a weekly pattern you can actually revisit: return days, reflection volume, top categories, and ayah that kept surfacing."
+            />
 
-                <section className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5 sm:p-8">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
-                                Active week
-                            </p>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-                                {formatUtcDateRange(
-                                    weekStart,
-                                    addDaysToIsoDate(weekStart, 6),
+            <section className="rounded-4xl border border-white/70 bg-white/88 p-6 shadow-xl shadow-emerald-950/8 backdrop-blur-xl sm:p-8">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
+                            Active week
+                        </p>
+                        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
+                            {formatUtcDateRange(
+                                weekStart,
+                                addDaysToIsoDate(weekStart, 6),
+                            )}
+                        </h2>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setWeekStart(addDaysToIsoDate(weekStart, -7))
+                            }
+                            className="rounded-full border border-zinc-200 bg-white/75 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-emerald-200 hover:bg-emerald-50/80"
+                        >
+                            Previous week
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setWeekStart(initialWeekStart)}
+                            disabled={weekStart === initialWeekStart}
+                            className="rounded-full border border-zinc-200 bg-white/75 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-emerald-200 hover:bg-emerald-50/80 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Current week
+                        </button>
+                    </div>
+                </div>
+
+                {weeklyInsightsQuery.isLoading ? (
+                    <div className="mt-5 rounded-3xl border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(236,253,245,0.72))] p-5 text-sm text-zinc-600">
+                        Loading weekly recap...
+                    </div>
+                ) : null}
+
+                {weeklyInsightsQuery.error ? (
+                    <div className="mt-5 rounded-3xl border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fef3c7_100%)] p-5 text-sm text-amber-900">
+                        <p>
+                            {weeklyInsightsQuery.error instanceof ApiClientError
+                                ? weeklyInsightsQuery.error.message
+                                : 'Failed to load weekly recap.'}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                void weeklyInsightsQuery.refetch()
+                            }}
+                            className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
+                        >
+                            Retry weekly recap
+                        </button>
+                    </div>
+                ) : null}
+
+                {weeklyInsights ? (
+                    <div className="mt-5 space-y-6">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <article className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5">
+                                <p className="text-sm font-medium text-zinc-500">
+                                    Return days
+                                </p>
+                                <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
+                                    {weeklyInsights.returnDays}
+                                </p>
+                            </article>
+                            <article className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5">
+                                <p className="text-sm font-medium text-zinc-500">
+                                    Reflections
+                                </p>
+                                <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
+                                    {weeklyInsights.reflectionCount}
+                                </p>
+                            </article>
+                            <article className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5 sm:col-span-2">
+                                <p className="text-sm font-medium text-zinc-500">
+                                    Coverage
+                                </p>
+                                <p className="mt-3 text-sm leading-7 text-zinc-700">
+                                    {weeklyInsights.returnDays === 0
+                                        ? 'No completed return days yet for this week.'
+                                        : `You completed ${weeklyInsights.returnDays} return day${weeklyInsights.returnDays === 1 ? '' : 's'} between ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
+                                </p>
+                            </article>
+                        </div>
+
+                        <div className="grid gap-4 lg:grid-cols-2">
+                            <section className="rounded-[1.75rem] border border-emerald-100/70 bg-white/68 p-5">
+                                <div className="space-y-2">
+                                    <p className="text-sm font-medium uppercase tracking-[0.16em] text-emerald-700">
+                                        Top categories
+                                    </p>
+                                    <h3 className="text-xl font-semibold tracking-tight text-zinc-950">
+                                        What you kept bringing in.
+                                    </h3>
+                                </div>
+
+                                {weeklyInsights.topCategories.length === 0 ? (
+                                    <p className="mt-4 text-sm leading-6 text-zinc-600">
+                                        No completed sessions yet this week.
+                                    </p>
+                                ) : (
+                                    <div className="mt-4 grid gap-3">
+                                        {weeklyInsights.topCategories.map(
+                                            (item) => (
+                                                <article
+                                                    key={item.category}
+                                                    className="rounded-2xl border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,244,245,0.9))] px-4 py-3"
+                                                >
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <p className="text-sm font-medium text-zinc-900">
+                                                            {item.category}
+                                                        </p>
+                                                        <p className="text-sm text-zinc-500">
+                                                            {item.count} session
+                                                            {item.count === 1
+                                                                ? ''
+                                                                : 's'}
+                                                        </p>
+                                                    </div>
+                                                </article>
+                                            ),
+                                        )}
+                                    </div>
                                 )}
-                            </h2>
-                        </div>
+                            </section>
 
-                        <div className="flex flex-wrap gap-3">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setWeekStart(
-                                        addDaysToIsoDate(weekStart, -7),
-                                    )
-                                }
-                                className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
-                            >
-                                Previous week
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setWeekStart(initialWeekStart)}
-                                disabled={weekStart === initialWeekStart}
-                                className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                Current week
-                            </button>
+                            <section className="rounded-[1.75rem] border border-emerald-100/70 bg-white/68 p-5">
+                                <div className="space-y-2">
+                                    <p className="text-sm font-medium uppercase tracking-[0.16em] text-emerald-700">
+                                        Top ayah
+                                    </p>
+                                    <h3 className="text-xl font-semibold tracking-tight text-zinc-950">
+                                        What returned most often.
+                                    </h3>
+                                </div>
+
+                                {weeklyInsights.topAyahKeys.length === 0 ? (
+                                    <p className="mt-4 text-sm leading-6 text-zinc-600">
+                                        No ayah revisit pattern yet this week.
+                                    </p>
+                                ) : (
+                                    <div className="mt-4 grid gap-3">
+                                        {weeklyInsights.topAyahKeys.map(
+                                            (item) => (
+                                                <article
+                                                    key={item.ayahKey}
+                                                    className="rounded-2xl border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,244,245,0.9))] px-4 py-3"
+                                                >
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <p className="text-sm font-medium text-zinc-900">
+                                                            Ayah {item.ayahKey}
+                                                        </p>
+                                                        <p className="text-sm text-zinc-500">
+                                                            {item.count} time
+                                                            {item.count === 1
+                                                                ? ''
+                                                                : 's'}
+                                                        </p>
+                                                    </div>
+                                                </article>
+                                            ),
+                                        )}
+                                    </div>
+                                )}
+                            </section>
                         </div>
                     </div>
-
-                    {weeklyInsightsQuery.isLoading ? (
-                        <div className="mt-5 rounded-3xl bg-zinc-50 p-5 text-sm text-zinc-600">
-                            Loading weekly recap...
-                        </div>
-                    ) : null}
-
-                    {weeklyInsightsQuery.error ? (
-                        <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-                            <p>
-                                {weeklyInsightsQuery.error instanceof
-                                ApiClientError
-                                    ? weeklyInsightsQuery.error.message
-                                    : 'Failed to load weekly recap.'}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    void weeklyInsightsQuery.refetch()
-                                }}
-                                className="mt-3 rounded-full border border-amber-300 px-4 py-2 text-sm font-medium transition hover:bg-amber-100"
-                            >
-                                Retry weekly recap
-                            </button>
-                        </div>
-                    ) : null}
-
-                    {weeklyInsights ? (
-                        <div className="mt-5 space-y-6">
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                <article className="rounded-[1.75rem] bg-zinc-50 p-5">
-                                    <p className="text-sm font-medium text-zinc-500">
-                                        Return days
-                                    </p>
-                                    <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-                                        {weeklyInsights.returnDays}
-                                    </p>
-                                </article>
-                                <article className="rounded-[1.75rem] bg-zinc-50 p-5">
-                                    <p className="text-sm font-medium text-zinc-500">
-                                        Reflections
-                                    </p>
-                                    <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-                                        {weeklyInsights.reflectionCount}
-                                    </p>
-                                </article>
-                                <article className="rounded-[1.75rem] bg-zinc-50 p-5 sm:col-span-2">
-                                    <p className="text-sm font-medium text-zinc-500">
-                                        Coverage
-                                    </p>
-                                    <p className="mt-3 text-sm leading-7 text-zinc-700">
-                                        {weeklyInsights.returnDays === 0
-                                            ? 'No completed return days yet for this week.'
-                                            : `You completed ${weeklyInsights.returnDays} return day${weeklyInsights.returnDays === 1 ? '' : 's'} between ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
-                                    </p>
-                                </article>
-                            </div>
-
-                            <div className="grid gap-4 lg:grid-cols-2">
-                                <section className="rounded-[1.75rem] border border-zinc-200 p-5">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium uppercase tracking-[0.16em] text-emerald-700">
-                                            Top categories
-                                        </p>
-                                        <h3 className="text-xl font-semibold tracking-tight text-zinc-950">
-                                            What you kept bringing in.
-                                        </h3>
-                                    </div>
-
-                                    {weeklyInsights.topCategories.length ===
-                                    0 ? (
-                                        <p className="mt-4 text-sm leading-6 text-zinc-600">
-                                            No completed sessions yet this week.
-                                        </p>
-                                    ) : (
-                                        <div className="mt-4 grid gap-3">
-                                            {weeklyInsights.topCategories.map(
-                                                (item) => (
-                                                    <article
-                                                        key={item.category}
-                                                        className="rounded-2xl bg-zinc-50 px-4 py-3"
-                                                    >
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <p className="text-sm font-medium text-zinc-900">
-                                                                {item.category}
-                                                            </p>
-                                                            <p className="text-sm text-zinc-500">
-                                                                {item.count}{' '}
-                                                                session
-                                                                {item.count ===
-                                                                1
-                                                                    ? ''
-                                                                    : 's'}
-                                                            </p>
-                                                        </div>
-                                                    </article>
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
-                                </section>
-
-                                <section className="rounded-[1.75rem] border border-zinc-200 p-5">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium uppercase tracking-[0.16em] text-emerald-700">
-                                            Top ayah
-                                        </p>
-                                        <h3 className="text-xl font-semibold tracking-tight text-zinc-950">
-                                            What returned most often.
-                                        </h3>
-                                    </div>
-
-                                    {weeklyInsights.topAyahKeys.length === 0 ? (
-                                        <p className="mt-4 text-sm leading-6 text-zinc-600">
-                                            No ayah revisit pattern yet this
-                                            week.
-                                        </p>
-                                    ) : (
-                                        <div className="mt-4 grid gap-3">
-                                            {weeklyInsights.topAyahKeys.map(
-                                                (item) => (
-                                                    <article
-                                                        key={item.ayahKey}
-                                                        className="rounded-2xl bg-zinc-50 px-4 py-3"
-                                                    >
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <p className="text-sm font-medium text-zinc-900">
-                                                                Ayah{' '}
-                                                                {item.ayahKey}
-                                                            </p>
-                                                            <p className="text-sm text-zinc-500">
-                                                                {item.count}{' '}
-                                                                time
-                                                                {item.count ===
-                                                                1
-                                                                    ? ''
-                                                                    : 's'}
-                                                            </p>
-                                                        </div>
-                                                    </article>
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
-                                </section>
-                            </div>
-                        </div>
-                    ) : null}
-                </section>
-            </div>
+                ) : null}
+            </section>
 
             <AppBottomNav />
-        </main>
+        </AuthenticatedPageShell>
     )
 }

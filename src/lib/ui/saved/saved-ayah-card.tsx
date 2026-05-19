@@ -16,7 +16,7 @@ export function SavedAyahCard({
     createdAt,
 }: SavedAyahCardProps) {
     return (
-        <article className="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-sm shadow-zinc-950/5">
+        <article className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,250,249,0.96))] p-5 shadow-sm shadow-zinc-950/5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <p className="text-sm font-medium text-zinc-500">Ayah</p>

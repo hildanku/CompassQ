@@ -15,7 +15,7 @@ function SubmitButton({ className }: LogoutButtonProps) {
 
     return (
         <button
-            className={`rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm shadow-zinc-950/5 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 ${className ?? ''}`}
+            className={`rounded-full border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,250,249,0.98))] px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm shadow-zinc-950/5 transition hover:border-emerald-200 hover:bg-emerald-50/80 disabled:cursor-not-allowed disabled:opacity-60 ${className ?? ''}`}
             type="submit"
             disabled={pending}
         >

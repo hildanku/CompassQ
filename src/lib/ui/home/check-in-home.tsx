@@ -398,7 +398,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
 
                 <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 z-40 bg-zinc-950/45 backdrop-blur-[2px]" />
-                    <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[85vh] w-full max-w-3xl flex-col rounded-t-[2rem] border border-zinc-200 bg-white shadow-2xl outline-none">
+                    <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[85vh] w-full max-w-3xl flex-col rounded-t-4xl border border-zinc-200 bg-white shadow-2xl outline-none">
                         <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-zinc-200" />
                         <div className="overflow-y-auto">
                             <CheckInComposer

@@ -17,7 +17,7 @@ export function CreateCollectionForm({
 
     return (
         <form
-            className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
+            className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5"
             onSubmit={async (event) => {
                 event.preventDefault()
 
@@ -48,7 +48,7 @@ export function CreateCollectionForm({
                     onChange={(event) => setName(event.target.value)}
                     maxLength={120}
                     required
-                    className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    className="w-full rounded-2xl border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,250,249,0.98))] px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     placeholder="Comfort verses"
                 />
             </label>

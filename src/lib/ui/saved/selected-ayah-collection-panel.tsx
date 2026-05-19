@@ -30,7 +30,7 @@ export function SelectedAyahCollectionPanel({
     onCreateCollection,
 }: SelectedAyahCollectionPanelProps) {
     return (
-        <section className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5 sm:p-8">
+        <section className="rounded-4xl border border-white/70 bg-white/88 p-6 shadow-xl shadow-emerald-950/8 backdrop-blur-xl sm:p-8">
             <div className="space-y-2">
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-emerald-700">
                     Current ayah
@@ -48,11 +48,11 @@ export function SelectedAyahCollectionPanel({
             <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="grid gap-3">
                     {isLoadingCollections ? (
-                        <div className="rounded-3xl bg-zinc-50 p-5 text-sm text-zinc-600">
+                        <div className="rounded-3xl border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(236,253,245,0.72))] p-5 text-sm text-zinc-600">
                             Loading collections...
                         </div>
                     ) : collectionsErrorMessage ? (
-                        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                        <div className="rounded-3xl border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fef3c7_100%)] p-5 text-sm text-amber-900">
                             <p>{collectionsErrorMessage}</p>
                             <button
                                 type="button"
@@ -63,7 +63,7 @@ export function SelectedAyahCollectionPanel({
                             </button>
                         </div>
                     ) : collections.length === 0 ? (
-                        <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-5 text-sm leading-6 text-zinc-600">
+                        <div className="rounded-3xl border border-dashed border-emerald-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(244,244,245,0.9))] p-5 text-sm leading-6 text-zinc-600">
                             No collections yet. Create your first one and this
                             ayah can go straight into it.
                         </div>
@@ -76,7 +76,7 @@ export function SelectedAyahCollectionPanel({
                             return (
                                 <article
                                     key={collection.id}
-                                    className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5"
+                                    className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5"
                                 >
                                     <div className="flex flex-wrap items-center justify-between gap-3">
                                         <div>
@@ -96,7 +96,7 @@ export function SelectedAyahCollectionPanel({
                                                 onAddToCollection(collection.id)
                                             }
                                             disabled={isAddingToCollection}
-                                            className="rounded-full bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                                            className="rounded-full bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300"
                                         >
                                             {alreadyExists
                                                 ? 'Already saved here'
