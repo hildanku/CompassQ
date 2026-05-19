@@ -21,6 +21,9 @@ export function WeeklyInsightsDashboard({
     initialWeekStart: string
 }) {
     const [weekStart, setWeekStart] = useState(initialWeekStart)
+    const nextWeekStart = addDaysToIsoDate(weekStart, 7)
+    const isViewingCurrentWeek = weekStart === initialWeekStart
+    const canViewNextWeek = nextWeekStart <= initialWeekStart
 
     const weeklyInsightsQuery = useQuery({
         queryKey: weeklyInsightsQueryKey(weekStart),
@@ -63,8 +66,16 @@ export function WeeklyInsightsDashboard({
                         </button>
                         <button
                             type="button"
+                            onClick={() => setWeekStart(nextWeekStart)}
+                            disabled={!canViewNextWeek}
+                            className="rounded-full border border-zinc-200 bg-white/75 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-emerald-200 hover:bg-emerald-50/80 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            Next week
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setWeekStart(initialWeekStart)}
-                            disabled={weekStart === initialWeekStart}
+                            disabled={isViewingCurrentWeek}
                             className="rounded-full border border-zinc-200 bg-white/75 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-emerald-200 hover:bg-emerald-50/80 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             Current week
@@ -122,7 +133,9 @@ export function WeeklyInsightsDashboard({
                                 </p>
                                 <p className="mt-3 text-sm leading-7 text-zinc-700">
                                     {weeklyInsights.returnDays === 0
-                                        ? 'No completed return days yet for this week.'
+                                        ? isViewingCurrentWeek
+                                            ? 'You have not completed a return day yet this week. Start a new Quran Moment to begin building this recap.'
+                                            : `No completed return days were recorded between ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`
                                         : `You completed ${weeklyInsights.returnDays} return day${weeklyInsights.returnDays === 1 ? '' : 's'} between ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
                                 </p>
                             </article>
@@ -141,7 +154,9 @@ export function WeeklyInsightsDashboard({
 
                                 {weeklyInsights.topCategories.length === 0 ? (
                                     <p className="mt-4 text-sm leading-6 text-zinc-600">
-                                        No completed sessions yet this week.
+                                        {isViewingCurrentWeek
+                                            ? 'No categories are showing yet because you have not completed a session this week.'
+                                            : `No category pattern was recorded for ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
                                     </p>
                                 ) : (
                                     <div className="mt-4 grid gap-3">
@@ -181,7 +196,9 @@ export function WeeklyInsightsDashboard({
 
                                 {weeklyInsights.topAyahKeys.length === 0 ? (
                                     <p className="mt-4 text-sm leading-6 text-zinc-600">
-                                        No ayah revisit pattern yet this week.
+                                        {isViewingCurrentWeek
+                                            ? 'No ayah revisit pattern has formed yet this week.'
+                                            : `No repeat ayah pattern was recorded for ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
                                     </p>
                                 ) : (
                                     <div className="mt-4 grid gap-3">
