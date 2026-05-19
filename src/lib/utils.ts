@@ -1,3 +1,27 @@
+const safeRedirectOrigin = 'http://local.test'
+
+export function getSafeRedirect(next: string | null | undefined) {
+    if (!next) {
+        return '/'
+    }
+
+    if (!next.startsWith('/') || next.startsWith('//') || next.includes('\\')) {
+        return '/'
+    }
+
+    try {
+        const url = new URL(next, safeRedirectOrigin)
+
+        if (url.origin !== safeRedirectOrigin) {
+            return '/'
+        }
+
+        return `${url.pathname}${url.search}${url.hash}`
+    } catch {
+        return '/'
+    }
+}
+
 const utcTimestampFormatter = new Intl.DateTimeFormat('en', {
     dateStyle: 'medium',
     timeStyle: 'short',

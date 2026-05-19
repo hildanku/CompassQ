@@ -2,14 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { ensureProfile } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-
-function getSafeRedirect(next: string | null) {
-    if (!next || !next.startsWith('/')) {
-        return '/'
-    }
-
-    return next
-}
+import { getSafeRedirect } from '@/lib/utils'
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)

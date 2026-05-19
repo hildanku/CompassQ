@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { getServerAuth } from '@/lib/auth'
+import { getSafeRedirect } from '@/lib/utils'
 import { LoginForm } from '@/lib/ui/login/login-form'
 
 type LoginPageProps = {
@@ -15,9 +16,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         searchParams,
         getServerAuth(),
     ])
+    const safeRedirect = getSafeRedirect(next)
 
     if (isConfigured && user) {
-        redirect(next && next.startsWith('/') ? next : '/')
+        redirect(safeRedirect)
     }
 
     return (
@@ -46,9 +48,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 </div>
 
                 {isConfigured ? (
-                    <LoginForm
-                        next={next && next.startsWith('/') ? next : '/'}
-                    />
+                    <LoginForm next={safeRedirect} />
                 ) : (
                     <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-8 shadow-sm shadow-amber-950/5">
                         <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">

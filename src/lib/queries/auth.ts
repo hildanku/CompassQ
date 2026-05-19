@@ -1,5 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+import { getSafeRedirect } from '@/lib/utils'
+
 export type OAuthProvider = 'google' | 'github'
 
 export async function signInWithMagicLink(
@@ -8,7 +10,7 @@ export async function signInWithMagicLink(
     next: string,
 ) {
     const redirectTo = new URL('/auth/callback', window.location.origin)
-    redirectTo.searchParams.set('next', next)
+    redirectTo.searchParams.set('next', getSafeRedirect(next))
 
     const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -33,7 +35,7 @@ export async function signInWithOAuth(
     next: string,
 ) {
     const redirectTo = new URL('/auth/callback', window.location.origin)
-    redirectTo.searchParams.set('next', next)
+    redirectTo.searchParams.set('next', getSafeRedirect(next))
 
     const { error } = await supabase.auth.signInWithOAuth({
         provider,
