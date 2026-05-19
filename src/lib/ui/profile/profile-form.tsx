@@ -1,11 +1,10 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { ApiClientError } from '@/lib/api'
 import {
-    fetchProfile,
     profileQueryKey,
     type EditableProfile,
     updateProfile,
@@ -24,12 +23,6 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
     )
     const [timezone, setTimezone] = useState(initialProfile.timezone)
 
-    useQuery({
-        queryKey: profileQueryKey,
-        queryFn: fetchProfile,
-        initialData: initialProfile,
-    })
-
     const saveProfileMutation = useMutation({
         mutationFn: updateProfile,
         onSuccess: async ({ message: successMessage, profile }) => {
@@ -37,7 +30,6 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             setDisplayName(profile.displayName ?? '')
             setTimezone(profile.timezone)
             feedback.success(successMessage)
-            await queryClient.invalidateQueries({ queryKey: profileQueryKey })
         },
         onError: (error) => {
             if (error instanceof ApiClientError) {
