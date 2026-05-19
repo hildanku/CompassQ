@@ -312,7 +312,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         </p>
                         <div className="space-y-2">
                             <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
-                                Start today's check-in with clarity.
+                                Start today&apos;s check-in with clarity.
                             </h1>
                             <p className="max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
                                 {displayName
@@ -330,7 +330,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             }}
                             className="rounded-2xl bg-zinc-950 px-5 py-4 text-sm font-semibold text-white transition hover:bg-zinc-800"
                         >
-                            Start today's check-in
+                            Start today&apos;s check-in
                         </button>
                         <p className="text-sm leading-6 text-zinc-500">
                             One primary check-in each day. If you already
