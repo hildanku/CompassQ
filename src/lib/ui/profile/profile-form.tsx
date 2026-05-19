@@ -10,6 +10,7 @@ import {
     type EditableProfile,
     updateProfile,
 } from '@/lib/queries/profile'
+import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
 
 type ProfileFormProps = {
     initialProfile: EditableProfile
@@ -17,7 +18,7 @@ type ProfileFormProps = {
 
 export function ProfileForm({ initialProfile }: ProfileFormProps) {
     const queryClient = useQueryClient()
-    const [message, setMessage] = useState<string | null>(null)
+    const feedback = useFeedbackState()
     const [displayName, setDisplayName] = useState(
         initialProfile.displayName ?? '',
     )
@@ -35,22 +36,22 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             queryClient.setQueryData(profileQueryKey, profile)
             setDisplayName(profile.displayName ?? '')
             setTimezone(profile.timezone)
-            setMessage(successMessage)
+            feedback.success(successMessage)
             await queryClient.invalidateQueries({ queryKey: profileQueryKey })
         },
         onError: (error) => {
             if (error instanceof ApiClientError) {
-                setMessage(error.message)
+                feedback.error(error.message)
                 return
             }
 
-            setMessage('Failed to save profile')
+            feedback.error('Failed to save profile')
         },
     })
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        setMessage(null)
+        feedback.clear()
 
         await saveProfileMutation.mutateAsync({
             displayName,
@@ -98,9 +99,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
                 {saveProfileMutation.isPending ? 'Saving...' : 'Save profile'}
             </button>
 
-            {message ? (
-                <p className="text-sm text-zinc-600">{message}</p>
-            ) : null}
+            <FeedbackMessage feedback={feedback.value} />
         </form>
     )
 }

@@ -2,8 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useState } from 'react'
-
 import { ApiClientError } from '@/lib/api'
 import {
     bookmarksQueryKey,
@@ -11,10 +9,11 @@ import {
     fetchBookmarks,
     removeBookmark,
 } from '@/lib/queries/save-actions'
+import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
 
 export function SaveActions({ ayahKey }: { ayahKey: string }) {
     const queryClient = useQueryClient()
-    const [message, setMessage] = useState<string | null>(null)
+    const feedback = useFeedbackState()
 
     const bookmarksQuery = useQuery({
         queryKey: bookmarksQueryKey,
@@ -24,17 +23,17 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
     const bookmarkMutation = useMutation({
         mutationFn: createBookmark,
         onSuccess: async (data) => {
-            setMessage(
-                data.created
-                    ? `Ayah ${data.ayahKey} bookmarked.`
-                    : `Ayah ${data.ayahKey} was already bookmarked.`,
-            )
+            if (data.created) {
+                feedback.success(`Ayah ${data.ayahKey} bookmarked.`)
+            } else {
+                feedback.info(`Ayah ${data.ayahKey} was already bookmarked.`)
+            }
             await queryClient.invalidateQueries({
                 queryKey: bookmarksQueryKey,
             })
         },
         onError: (error) => {
-            setMessage(
+            feedback.error(
                 error instanceof ApiClientError
                     ? error.message
                     : 'Failed to bookmark this ayah.',
@@ -45,13 +44,13 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
     const removeBookmarkMutation = useMutation({
         mutationFn: removeBookmark,
         onSuccess: async (data) => {
-            setMessage(`Bookmark removed for ayah ${data.ayahKey}.`)
+            feedback.success(`Bookmark removed for ayah ${data.ayahKey}.`)
             await queryClient.invalidateQueries({
                 queryKey: bookmarksQueryKey,
             })
         },
         onError: (error) => {
-            setMessage(
+            feedback.error(
                 error instanceof ApiClientError
                     ? error.message
                     : 'Failed to remove bookmark.',
@@ -87,7 +86,7 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
                     <button
                         type="button"
                         onClick={() => {
-                            setMessage(null)
+                            feedback.clear()
 
                             if (isBookmarked) {
                                 void removeBookmarkMutation.mutateAsync(ayahKey)
@@ -125,9 +124,7 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
                 </p>
             ) : null}
 
-            {message ? (
-                <p className="mt-4 text-sm text-zinc-600">{message}</p>
-            ) : null}
+            <FeedbackMessage feedback={feedback.value} className="mt-4" />
         </section>
     )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { type SessionCompletionResponse } from '@/lib/queries/moments'
+import { FeedbackMessage } from '@/lib/ui/feedback'
 
 export function ReflectionSection({
     reflectionDraft,
@@ -69,7 +70,13 @@ export function ReflectionSection({
 
                     {reflectionError ? (
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-                            <p>{reflectionError}</p>
+                            <FeedbackMessage
+                                feedback={{
+                                    kind: 'error',
+                                    message: reflectionError,
+                                }}
+                                className="border-0 bg-transparent p-0 text-inherit"
+                            />
                             <button
                                 type="button"
                                 onClick={onSubmitReflection}

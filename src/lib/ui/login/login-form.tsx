@@ -8,6 +8,7 @@ import {
     signInWithOAuth as signInWithOAuthRequest,
 } from '@/lib/queries/auth'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
+import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
 
 type LoginFormProps = {
     next: string
@@ -16,16 +17,16 @@ type LoginFormProps = {
 export function LoginForm({ next }: LoginFormProps) {
     const supabase = useMemo(() => createBrowserSupabaseClient(), [])
     const [email, setEmail] = useState('')
-    const [message, setMessage] = useState<string | null>(null)
+    const feedback = useFeedbackState()
 
     const magicLinkMutation = useMutation({
         mutationFn: (nextPath: string) =>
             signInWithMagicLinkRequest(supabase, email, nextPath),
         onSuccess: (successMessage) => {
-            setMessage(successMessage)
+            feedback.success(successMessage)
         },
         onError: (error) => {
-            setMessage(error instanceof Error ? error.message : 'Login failed')
+            feedback.error(error instanceof Error ? error.message : 'Login failed')
         },
     })
 
@@ -33,7 +34,7 @@ export function LoginForm({ next }: LoginFormProps) {
         mutationFn: (provider: 'google' | 'github') =>
             signInWithOAuthRequest(supabase, provider, next),
         onError: (error) => {
-            setMessage(error instanceof Error ? error.message : 'Login failed')
+            feedback.error(error instanceof Error ? error.message : 'Login failed')
         },
     })
 
@@ -43,13 +44,13 @@ export function LoginForm({ next }: LoginFormProps) {
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
-        setMessage(null)
+        feedback.clear()
 
         await magicLinkMutation.mutateAsync(next)
     }
 
     async function signInWithOAuth(provider: 'google' | 'github') {
-        setMessage(null)
+        feedback.clear()
         await oauthMutation.mutateAsync(provider)
     }
 
@@ -111,11 +112,7 @@ export function LoginForm({ next }: LoginFormProps) {
                 </button>
             </div>
 
-            {message ? (
-                <p className="mt-4 rounded-2xl bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
-                    {message}
-                </p>
-            ) : null}
+            <FeedbackMessage feedback={feedback.value} className="mt-4" />
         </div>
     )
 }

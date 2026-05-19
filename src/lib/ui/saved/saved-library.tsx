@@ -15,6 +15,7 @@ import {
     fetchCollections,
     removeBookmark,
 } from '@/lib/queries/save-actions'
+import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
 import { formatUtcTimestamp } from '@/lib/utils'
 
 function SavedAyahCard({
@@ -64,7 +65,7 @@ export function SavedLibrary() {
     const searchParams = useSearchParams()
     const selectedAyahKey = searchParams.get('ayahKey')?.trim() ?? ''
     const [newCollectionName, setNewCollectionName] = useState('')
-    const [message, setMessage] = useState<string | null>(null)
+    const feedback = useFeedbackState()
 
     const bookmarksQuery = useQuery({
         queryKey: bookmarksQueryKey,
@@ -79,11 +80,11 @@ export function SavedLibrary() {
     const createCollectionMutation = useMutation({
         mutationFn: createCollection,
         onSuccess: async (data) => {
-            setMessage(
-                data.created
-                    ? 'Collection created.'
-                    : 'Collection already exists. Reusing it.',
-            )
+            if (data.created) {
+                feedback.success('Collection created.')
+            } else {
+                feedback.info('Collection already exists. Reusing it.')
+            }
             setNewCollectionName('')
             await queryClient.invalidateQueries({
                 queryKey: collectionsQueryKey,
@@ -99,7 +100,7 @@ export function SavedLibrary() {
             })
         },
         onError: (error) => {
-            setMessage(
+            feedback.error(
                 error instanceof ApiClientError
                     ? error.message
                     : 'Failed to create collection.',
@@ -116,17 +117,19 @@ export function SavedLibrary() {
             ayahKey: string
         }) => addCollectionItem(collectionId, ayahKey),
         onSuccess: async (data) => {
-            setMessage(
-                data.created
-                    ? `Ayah ${data.ayahKey} added to collection.`
-                    : `Ayah ${data.ayahKey} is already in that collection.`,
-            )
+            if (data.created) {
+                feedback.success(`Ayah ${data.ayahKey} added to collection.`)
+            } else {
+                feedback.info(
+                    `Ayah ${data.ayahKey} is already in that collection.`,
+                )
+            }
             await queryClient.invalidateQueries({
                 queryKey: collectionsQueryKey,
             })
         },
         onError: (error) => {
-            setMessage(
+            feedback.error(
                 error instanceof ApiClientError
                     ? error.message
                     : 'Failed to add ayah to collection.',
@@ -137,11 +140,11 @@ export function SavedLibrary() {
     const removeBookmarkMutation = useMutation({
         mutationFn: removeBookmark,
         onSuccess: async (data) => {
-            setMessage(`Bookmark removed for ayah ${data.ayahKey}.`)
+            feedback.success(`Bookmark removed for ayah ${data.ayahKey}.`)
             await queryClient.invalidateQueries({ queryKey: bookmarksQueryKey })
         },
         onError: (error) => {
-            setMessage(
+            feedback.error(
                 error instanceof ApiClientError
                     ? error.message
                     : 'Failed to remove bookmark.',
@@ -171,7 +174,7 @@ export function SavedLibrary() {
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
-        setMessage(null)
+        feedback.clear()
         await createCollectionMutation.mutateAsync(newCollectionName)
     }
 
@@ -222,6 +225,8 @@ export function SavedLibrary() {
                         </div>
                     </div>
                 </section>
+
+                <FeedbackMessage feedback={feedback.value} />
 
                 {selectedAyahKey ? (
                     <section className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-sm shadow-zinc-950/5 sm:p-8">
@@ -297,7 +302,7 @@ export function SavedLibrary() {
                                                     <button
                                                         type="button"
                                                         onClick={() => {
-                                                            setMessage(null)
+                                                            feedback.clear()
                                                             void addToCollectionMutation.mutateAsync(
                                                                 {
                                                                     collectionId:
@@ -371,11 +376,6 @@ export function SavedLibrary() {
                             </form>
                         </div>
 
-                        {message ? (
-                            <p className="mt-4 text-sm text-zinc-600">
-                                {message}
-                            </p>
-                        ) : null}
                     </section>
                 ) : null}
 
@@ -422,7 +422,7 @@ export function SavedLibrary() {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setMessage(null)
+                                            feedback.clear()
                                             void removeBookmarkMutation.mutateAsync(
                                                 bookmark.ayahKey,
                                             )

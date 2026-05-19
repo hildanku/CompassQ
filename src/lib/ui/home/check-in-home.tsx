@@ -11,6 +11,7 @@ import { getSurahName } from '@/lib/quran'
 import { fetchHistory, historyQueryKey } from '@/lib/queries/moments'
 import { HistorySection } from '@/lib/ui/history/history-section'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
+import { FeedbackMessage, type Feedback } from '@/lib/ui/feedback'
 
 import { CheckInAudioPlayer } from './check-in-audio-player'
 import { ReflectionSection } from './reflection-section'
@@ -27,7 +28,7 @@ type CheckInComposerProps = {
     setSelectedCategory: (
         category: (typeof checkInCategoryValues)[number],
     ) => void
-    message: string | null
+    feedback: Feedback
     isSubmitting: boolean
     shouldShowLoadingSkeleton: boolean
     hasRetryAction: boolean
@@ -38,7 +39,7 @@ function CheckInComposer({
     displayName,
     selectedCategory,
     setSelectedCategory,
-    message,
+    feedback,
     isSubmitting,
     shouldShowLoadingSkeleton,
     hasRetryAction,
@@ -140,9 +141,9 @@ function CheckInComposer({
                     </div>
                 ) : null}
 
-                {message ? (
-                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-700">
-                        <p>{message}</p>
+                {feedback ? (
+                    <div>
+                        <FeedbackMessage feedback={feedback} />
                         {hasRetryAction ? (
                             <button
                                 type="button"
@@ -169,7 +170,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
     const {
         selectedCategory,
         setSelectedCategory,
-        message,
+        feedback,
         activeMoment,
         reflectionDraft,
         reflectionError,
@@ -404,7 +405,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 displayName={displayName}
                                 selectedCategory={selectedCategory}
                                 setSelectedCategory={setSelectedCategory}
-                                message={message}
+                                feedback={feedback}
                                 isSubmitting={isSubmitting}
                                 shouldShowLoadingSkeleton={
                                     shouldShowLoadingSkeleton

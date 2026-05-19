@@ -14,6 +14,7 @@ import {
     type RecommendedAyah,
     type SessionCompletionResponse,
 } from '@/lib/queries/moments'
+import { type Feedback, useFeedbackState } from '@/lib/ui/feedback'
 
 export type ActiveMoment = {
     checkInId: string
@@ -25,10 +26,11 @@ export type ActiveMoment = {
 type ReflectionStep = 'compose' | 'next'
 
 type FeedbackState = {
-    message: string | null
+    feedback: Feedback
     reflectionError: string | null
-    clearMessage: () => void
-    setMessage: (value: string | null) => void
+    clearFeedback: () => void
+    error: (message: string) => void
+    info: (message: string) => void
     clearReflectionError: () => void
     setReflectionError: (value: string | null) => void
 }
@@ -61,14 +63,15 @@ function getStoredReflectionDraft(sessionId?: string) {
 }
 
 function useCheckInFeedback(): FeedbackState {
-    const [message, setMessage] = useState<string | null>(null)
+    const feedback = useFeedbackState()
     const [reflectionError, setReflectionError] = useState<string | null>(null)
 
     return {
-        message,
+        feedback: feedback.value,
         reflectionError,
-        clearMessage: () => setMessage(null),
-        setMessage,
+        clearFeedback: feedback.clear,
+        error: feedback.error,
+        info: feedback.info,
         clearReflectionError: () => setReflectionError(null),
         setReflectionError,
     }
@@ -171,11 +174,11 @@ export function useCheckInFlow() {
         mutationFn: createCheckIn,
         onError: (error) => {
             if (error instanceof ApiClientError) {
-                feedback.setMessage(error.message)
+                feedback.error(error.message)
                 return
             }
 
-            feedback.setMessage('Failed to save your check-in. Please try again.')
+            feedback.error('Failed to save your check-in. Please try again.')
         },
     })
 
@@ -183,11 +186,11 @@ export function useCheckInFlow() {
         mutationFn: recommendMoment,
         onError: (error) => {
             if (error instanceof ApiClientError) {
-                feedback.setMessage(error.message)
+                feedback.error(error.message)
                 return
             }
 
-            feedback.setMessage('Failed to load your Quran Moment. Please try again.')
+            feedback.error('Failed to load your Quran Moment. Please try again.')
         },
     })
 
@@ -246,7 +249,7 @@ export function useCheckInFlow() {
     })
 
     async function handleContinue() {
-        feedback.clearMessage()
+        feedback.clearFeedback()
         setActiveMoment(null)
         reflection.resetReflectionComposer()
 
@@ -255,7 +258,7 @@ export function useCheckInFlow() {
                 await createCheckInMutation.mutateAsync(selectedCategory)
 
             if (checkIn.reused && checkIn.hasCompletedSession) {
-                feedback.setMessage(
+                feedback.info(
                     "You've already completed today's Quran Moment. Revisit history or come back tomorrow for a new daily check-in.",
                 )
                 return
@@ -272,7 +275,7 @@ export function useCheckInFlow() {
                 ayah: moment.ayah,
             })
             reflection.resetReflectionComposer(moment.sessionId)
-            feedback.clearMessage()
+            feedback.clearFeedback()
         } catch {
             // Error state is already handled by the mutation callbacks.
         }
@@ -280,7 +283,7 @@ export function useCheckInFlow() {
 
     function handleStartAnotherCheckIn() {
         setActiveMoment(null)
-        feedback.clearMessage()
+        feedback.clearFeedback()
         reflection.resetReflectionComposer()
     }
 
@@ -312,7 +315,7 @@ export function useCheckInFlow() {
     return {
         selectedCategory,
         setSelectedCategory,
-        message: feedback.message,
+        feedback: feedback.feedback,
         activeMoment,
         reflectionDraft: reflection.reflectionDraft,
         reflectionError: feedback.reflectionError,
@@ -330,7 +333,7 @@ export function useCheckInFlow() {
                 recommendMomentMutation.isPending) &&
             !activeMoment,
         hasRetryAction:
-            Boolean(feedback.message) &&
+            Boolean(feedback.feedback) &&
             !(
                 createCheckInMutation.isPending ||
                 recommendMomentMutation.isPending
