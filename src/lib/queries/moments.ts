@@ -62,6 +62,28 @@ type HistoryResponse = {
     sessions: HistorySession[]
 }
 
+export type TodayCheckInResponse = {
+    exists: boolean
+    hasCompletedSession: boolean
+}
+
+export const todayCheckInQueryKey = ['check-ins', 'today'] as const
+
+export async function fetchTodayCheckIn() {
+    const payload = await apiFetch<TodayCheckInResponse>(
+        '/api/v1/check-ins/today',
+    )
+
+    if (!payload.data) {
+        throw new ApiClientError("Failed to load today's check-in status", {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
 export function historyQueryKey(limit: number) {
     return ['history', limit] as const
 }

@@ -8,7 +8,7 @@ import { ApiClientError } from '@/lib/api'
 import { checkInCategoryLabels } from '@/lib/constant'
 import { checkInCategoryValues } from '@/lib/contracts'
 import { getSurahName } from '@/lib/quran'
-import { fetchHistory, historyQueryKey } from '@/lib/queries/moments'
+import { fetchHistory, fetchTodayCheckIn, historyQueryKey, todayCheckInQueryKey } from '@/lib/queries/moments'
 import { HistorySection } from '@/lib/ui/history/history-section'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import { FeedbackMessage, type Feedback } from '@/lib/ui/feedback'
@@ -163,6 +163,11 @@ function CheckInComposer({
 
 export function CheckInHome({ displayName }: CheckInHomeProps) {
     const [isCheckInDrawerOpen, setIsCheckInDrawerOpen] = useState(false)
+    const todayCheckInQuery = useQuery({
+        queryKey: todayCheckInQueryKey,
+        queryFn: fetchTodayCheckIn,
+    })
+    const hasCheckedInToday = todayCheckInQuery.data?.exists ?? false
     const historyQuery = useQuery({
         queryKey: historyQueryKey(10),
         queryFn: () => fetchHistory(10),
@@ -299,7 +304,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                     </section>
                 </div>
 
-                <AppBottomNav />
+                <AppBottomNav onCheckIn={() => setIsCheckInDrawerOpen(true)} checkInDisabled={hasCheckedInToday} />
             </main>
         )
     }
@@ -331,9 +336,16 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             onClick={() => {
                                 setIsCheckInDrawerOpen(true)
                             }}
-                            className="rounded-2xl bg-zinc-950 px-5 py-4 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                            disabled={hasCheckedInToday}
+                            className={`rounded-2xl px-5 py-4 text-sm font-semibold transition ${
+                                hasCheckedInToday
+                                    ? 'cursor-not-allowed bg-zinc-100 text-zinc-400'
+                                    : 'bg-zinc-950 text-white hover:bg-zinc-800'
+                            }`}
                         >
-                            Start today&apos;s check-in
+                            {hasCheckedInToday
+                                ? "You've checked in today"
+                                : "Start today's check-in"}
                         </button>
                         <p className="text-sm leading-6 text-zinc-500">
                             One primary check-in each day. If you already
@@ -400,16 +412,6 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                 onOpenChange={setIsCheckInDrawerOpen}
                 direction="bottom"
             >
-                <Drawer.Trigger asChild>
-                    <button
-                        type="button"
-                        data-tour="floating-checkin"
-                        className="fixed right-4 bottom-24 z-50 rounded-full bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-950/25 transition hover:bg-zinc-800 sm:right-6"
-                    >
-                        + Check in
-                    </button>
-                </Drawer.Trigger>
-
                 <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 z-40 bg-zinc-950/45 backdrop-blur-[2px]" />
                     <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[85vh] w-full max-w-3xl flex-col rounded-t-4xl border border-zinc-200 bg-white shadow-2xl outline-none">
@@ -432,7 +434,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                 </Drawer.Portal>
             </Drawer.Root>
 
-            <AppBottomNav />
+            <AppBottomNav onCheckIn={() => setIsCheckInDrawerOpen(true)} checkInDisabled={hasCheckedInToday} />
 
             <OnboardingTour isFirstUser={!historyQuery.isLoading && (historyQuery.data?.sessions.length ?? 0) === 0} />
         </main>
