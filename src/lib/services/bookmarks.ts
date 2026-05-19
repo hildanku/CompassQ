@@ -18,6 +18,10 @@ type BookmarkRow = {
     quran_references: BookmarkReferenceRow | BookmarkReferenceRow[] | null
 }
 
+type BookmarkStatusRow = {
+    id: string
+}
+
 function normalizeReference(
     reference: BookmarkReferenceRow | BookmarkReferenceRow[] | null,
 ) {
@@ -53,6 +57,27 @@ export async function listBookmarks({ supabase, userId }: ServiceContext) {
                 audioUrl: reference?.audio_url,
             }
         }),
+    }
+}
+
+export async function getBookmarkStatus(
+    { supabase, userId }: ServiceContext,
+    ayahKey: string,
+) {
+    const { data, error } = await supabase
+        .from('bookmarks')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('ayah_key', ayahKey)
+        .maybeSingle()
+
+    if (error) {
+        throw new ServiceError(500, 'Failed to load bookmark status')
+    }
+
+    return {
+        ayahKey,
+        isBookmarked: Boolean(data as BookmarkStatusRow | null),
     }
 }
 

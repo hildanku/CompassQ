@@ -4,9 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { ApiClientError } from '@/lib/api'
 import {
+    bookmarkStatusQueryKey,
     bookmarksQueryKey,
     createBookmark,
-    fetchBookmarks,
+    fetchBookmarkStatus,
     removeBookmark,
 } from '@/lib/queries/save-actions'
 import { FeedbackMessage, useFeedbackState } from '@/lib/ui/feedback'
@@ -15,9 +16,9 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
     const queryClient = useQueryClient()
     const feedback = useFeedbackState()
 
-    const bookmarksQuery = useQuery({
-        queryKey: bookmarksQueryKey,
-        queryFn: fetchBookmarks,
+    const bookmarkStatusQuery = useQuery({
+        queryKey: bookmarkStatusQueryKey(ayahKey),
+        queryFn: () => fetchBookmarkStatus(ayahKey),
     })
 
     const bookmarkMutation = useMutation({
@@ -28,6 +29,9 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
             } else {
                 feedback.info(`Ayah ${data.ayahKey} was already bookmarked.`)
             }
+            await queryClient.invalidateQueries({
+                queryKey: bookmarkStatusQueryKey(ayahKey),
+            })
             await queryClient.invalidateQueries({
                 queryKey: bookmarksQueryKey,
             })
@@ -46,6 +50,9 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
         onSuccess: async (data) => {
             feedback.success(`Bookmark removed for ayah ${data.ayahKey}.`)
             await queryClient.invalidateQueries({
+                queryKey: bookmarkStatusQueryKey(ayahKey),
+            })
+            await queryClient.invalidateQueries({
                 queryKey: bookmarksQueryKey,
             })
         },
@@ -58,13 +65,12 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
         },
     })
 
-    const bookmarks = bookmarksQuery.data ?? []
-    const existingBookmark = bookmarks.find(
-        (bookmark) => bookmark.ayahKey === ayahKey,
-    )
-    const isBookmarked = Boolean(existingBookmark)
+    const isBookmarked = bookmarkStatusQuery.data?.isBookmarked ?? false
+    const isCheckingBookmarkStatus = bookmarkStatusQuery.isLoading
     const isMutating =
-        bookmarkMutation.isPending || removeBookmarkMutation.isPending
+        bookmarkMutation.isPending ||
+        removeBookmarkMutation.isPending ||
+        isCheckingBookmarkStatus
 
     return (
         <section className="mt-6 rounded-[1.75rem] border border-zinc-200 bg-white p-5 sm:p-6">
@@ -102,7 +108,9 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
                                 : 'bg-zinc-950 text-white hover:bg-zinc-800'
                         }`}
                     >
-                        {isMutating
+                        {isCheckingBookmarkStatus
+                            ? 'Checking bookmark...'
+                            : isMutating
                             ? 'Saving...'
                             : isBookmarked
                               ? 'Bookmarked'
@@ -118,9 +126,9 @@ export function SaveActions({ ayahKey }: { ayahKey: string }) {
                 </div>
             </div>
 
-            {bookmarksQuery.error instanceof ApiClientError ? (
+            {bookmarkStatusQuery.error instanceof ApiClientError ? (
                 <p className="mt-4 text-sm text-zinc-600">
-                    {bookmarksQuery.error.message}
+                    {bookmarkStatusQuery.error.message}
                 </p>
             ) : null}
 

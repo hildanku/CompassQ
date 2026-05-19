@@ -15,6 +15,11 @@ export type Bookmark = SavedAyah & {
     bookmarkId: string
 }
 
+export type BookmarkStatus = {
+    ayahKey: string
+    isBookmarked: boolean
+}
+
 export type CollectionItem = SavedAyah & {
     collectionItemId: string
 }
@@ -30,6 +35,8 @@ export type Collection = {
 type BookmarksResponse = {
     bookmarks: Bookmark[]
 }
+
+type BookmarkStatusResponse = BookmarkStatus
 
 type CollectionsResponse = {
     collections: Collection[]
@@ -65,6 +72,10 @@ type AddCollectionItemResponse = {
 export const bookmarksQueryKey = ['bookmarks'] as const
 export const collectionsQueryKey = ['collections'] as const
 
+export function bookmarkStatusQueryKey(ayahKey: string) {
+    return ['bookmarks', 'status', ayahKey] as const
+}
+
 export async function fetchBookmarks() {
     const payload = await apiFetch<BookmarksResponse>('/api/v1/bookmarks')
 
@@ -76,6 +87,21 @@ export async function fetchBookmarks() {
     }
 
     return payload.data.bookmarks
+}
+
+export async function fetchBookmarkStatus(ayahKey: string) {
+    const payload = await apiFetch<BookmarkStatusResponse>(
+        `/api/v1/bookmarks/${encodeURIComponent(ayahKey)}`,
+    )
+
+    if (!payload.data || payload.data.ayahKey !== ayahKey) {
+        throw new ApiClientError('Failed to load bookmark status', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
 }
 
 export async function createBookmark(ayahKey: string) {
