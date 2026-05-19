@@ -17,6 +17,7 @@ import { CheckInAudioPlayer } from './check-in-audio-player'
 import { ReflectionSection } from './reflection-section'
 import { SaveActions } from './save-actions'
 import { useCheckInFlow } from './use-check-in-flow'
+import { OnboardingTour } from '@/lib/ui/onboarding-tour'
 
 type CheckInHomeProps = {
     displayName: string | null
@@ -326,6 +327,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <button
                             type="button"
+                            data-tour="checkin-button"
                             onClick={() => {
                                 setIsCheckInDrawerOpen(true)
                             }}
@@ -339,28 +341,39 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         </p>
                     </div>
 
-                    <div className="grid gap-3 text-white/90 sm:grid-cols-3">
-                        <article className="rounded-3xl bg-zinc-950 p-4 text-white">
-                            <p className="text-sm font-medium">1. Check in</p>
-                            <p className="mt-2 text-sm leading-6 text-zinc-200">
-                                Start with the moment that feels closest right
-                                now.
-                            </p>
-                        </article>
-                        <article className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 text-zinc-900">
-                            <p className="text-sm font-medium">2. Receive</p>
-                            <p className="mt-2 text-sm leading-6 text-zinc-600">
-                                Open your Quran Moment with ayah, translation,
-                                and recitation.
-                            </p>
-                        </article>
-                        <article className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 text-zinc-900">
-                            <p className="text-sm font-medium">3. Revisit</p>
-                            <p className="mt-2 text-sm leading-6 text-zinc-600">
-                                Return to recent sessions anytime from your
-                                history.
-                            </p>
-                        </article>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        {[
+                            {
+                                step: '01',
+                                label: 'Check in',
+                                desc: 'Start with the moment that feels closest right now.',
+                            },
+                            {
+                                step: '02',
+                                label: 'Receive',
+                                desc: 'Open your Quran Moment with ayah, translation, and recitation.',
+                            },
+                            {
+                                step: '03',
+                                label: 'Revisit',
+                                desc: 'Return to recent sessions anytime from your history.',
+                            },
+                        ].map(({ step, label, desc }) => (
+                            <article
+                                key={step}
+                                className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-4"
+                            >
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                                    {step}
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-zinc-900">
+                                    {label}
+                                </p>
+                                <p className="mt-1 text-sm leading-6 text-zinc-600">
+                                    {desc}
+                                </p>
+                            </article>
+                        ))}
                     </div>
                 </section>
 
@@ -390,6 +403,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                 <Drawer.Trigger asChild>
                     <button
                         type="button"
+                        data-tour="floating-checkin"
                         className="fixed right-4 bottom-24 z-50 rounded-full bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-950/25 transition hover:bg-zinc-800 sm:right-6"
                     >
                         + Check in
@@ -419,6 +433,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
             </Drawer.Root>
 
             <AppBottomNav />
+
+            <OnboardingTour isFirstUser={!historyQuery.isLoading && (historyQuery.data?.sessions.length ?? 0) === 0} />
         </main>
     )
 }

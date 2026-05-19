@@ -1,9 +1,12 @@
 import Link from 'next/link'
 
 import { checkInCategoryLabels } from '@/lib/constant'
+import { checkInCategoryValues } from '@/lib/contracts'
 import { getAyahReference } from '@/lib/quran'
 import { type HistorySession } from '@/lib/queries/moments'
 import { formatUtcTimestamp } from '@/lib/utils'
+
+type CheckInCategory = (typeof checkInCategoryValues)[number]
 
 type HistorySectionProps = {
     sessions: HistorySession[]
@@ -16,12 +19,28 @@ type HistorySectionProps = {
     onRetry?: () => void
 }
 
+const categoryColors: Record<CheckInCategory, string> = {
+    anxiety: 'bg-violet-100 text-violet-700',
+    gratitude: 'bg-emerald-100 text-emerald-700',
+    patience: 'bg-sky-100 text-sky-700',
+    guidance: 'bg-amber-100 text-amber-700',
+    hope: 'bg-teal-100 text-teal-700',
+    discipline: 'bg-orange-100 text-orange-700',
+    feeling_distant: 'bg-zinc-100 text-zinc-600',
+    need_comfort: 'bg-rose-100 text-rose-700',
+}
+
 function getCategoryLabel(category: HistorySession['category']) {
     if (!category) {
         return 'Quran Moment'
     }
 
     return checkInCategoryLabels[category] ?? 'Quran Moment'
+}
+
+function getCategoryColors(category: HistorySession['category']) {
+    if (!category) return 'bg-zinc-100 text-zinc-600'
+    return categoryColors[category] ?? 'bg-zinc-100 text-zinc-600'
 }
 
 export function HistorySection({
@@ -99,9 +118,9 @@ export function HistorySection({
                             >
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                     <div className="space-y-1">
-                                        <p className="text-sm font-medium text-zinc-500">
+                                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getCategoryColors(session.category)}`}>
                                             {getCategoryLabel(session.category)}
-                                        </p>
+                                        </span>
                                         <h3 className="text-lg font-semibold text-zinc-950">
                                             {ayahReference
                                                 ? `Surah ${ayahReference.surahName}, Ayah ${ayahReference.ayahNumber}`

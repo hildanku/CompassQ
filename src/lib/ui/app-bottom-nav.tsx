@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     },
     {
         href: '/insights',
-        label: 'Recap',
+        label: 'Insights',
         icon: BarChart3,
         isActive: (pathname) => pathname.startsWith('/insights'),
     },
@@ -51,6 +51,7 @@ export function AppBottomNav() {
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-4">
             <nav
                 aria-label="Primary"
+                data-tour="bottom-nav"
                 className="pointer-events-auto flex w-full max-w-lg items-center gap-2 rounded-[1.75rem] border border-white/70 bg-white/88 p-2 shadow-2xl shadow-zinc-950/15 backdrop-blur-xl"
             >
                 {navItems.map((item) => {
