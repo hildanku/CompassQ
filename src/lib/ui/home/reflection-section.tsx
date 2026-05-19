@@ -32,11 +32,11 @@ export function ReflectionSection({
                     Reflection
                 </p>
                 <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
-                    Capture this moment in one line.
+                    Capture this moment in a short reflection.
                 </h2>
                 <p className="text-sm leading-6 text-zinc-600 sm:text-base">
-                    Reflection is optional. You can continue with an empty line
-                    or save a short note up to 280 characters.
+                    Write a short reflection, or continue without one. You can
+                    save up to 280 characters.
                 </p>
             </div>
 
@@ -46,15 +46,15 @@ export function ReflectionSection({
                         <span className="text-sm font-medium text-zinc-900">
                             Your reflection
                         </span>
-                        <input
-                            type="text"
+                        <textarea
                             value={reflectionDraft}
                             maxLength={280}
+                            rows={3}
                             onChange={(event) => {
                                 onReflectionDraftChange(event.target.value)
                             }}
                             placeholder="What stands out for you right now?"
-                            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                            className="w-full resize-none rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                         />
                     </label>
 
@@ -63,7 +63,7 @@ export function ReflectionSection({
                         <p>
                             {reflectionDraft.trim().length === 0
                                 ? 'Empty reflection will still be saved.'
-                                : 'Single-line reflection only.'}
+                                : 'Keep it short and simple.'}
                         </p>
                     </div>
 
