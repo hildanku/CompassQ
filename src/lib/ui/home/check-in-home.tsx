@@ -312,35 +312,52 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                         </p>
                         <div className="space-y-2">
                             <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
-                                Revisit your Quran moments first.
+                                Start today's check-in with clarity.
                             </h1>
                             <p className="max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
                                 {displayName
-                                    ? `${displayName}, start from your recent history and open a new check-in whenever you are ready.`
-                                    : 'Start from your recent history, then open a new check-in from the floating button whenever you are ready.'}
+                                    ? `${displayName}, begin with a new check-in, then revisit recent moments whenever you want to look back.`
+                                    : 'Begin with a new check-in, then revisit recent moments whenever you want to look back.'}
                             </p>
                         </div>
                     </div>
 
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsCheckInDrawerOpen(true)
+                            }}
+                            className="rounded-2xl bg-zinc-950 px-5 py-4 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                        >
+                            Start today's check-in
+                        </button>
+                        <p className="text-sm leading-6 text-zinc-500">
+                            One primary check-in each day. If you already
+                            started today, we will continue that Quran Moment.
+                        </p>
+                    </div>
+
                     <div className="grid gap-3 text-white/90 sm:grid-cols-3">
                         <article className="rounded-3xl bg-zinc-950 p-4 text-white">
-                            <p className="text-sm font-medium">1. Revisit</p>
+                            <p className="text-sm font-medium">1. Check in</p>
                             <p className="mt-2 text-sm leading-6 text-zinc-200">
-                                See your latest sessions before starting a new
-                                one.
+                                Start with the moment that feels closest right
+                                now.
                             </p>
                         </article>
                         <article className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 text-zinc-900">
-                            <p className="text-sm font-medium">2. Check in</p>
+                            <p className="text-sm font-medium">2. Receive</p>
                             <p className="mt-2 text-sm leading-6 text-zinc-600">
-                                Use the floating button to open the mood drawer.
+                                Open your Quran Moment with ayah, translation,
+                                and recitation.
                             </p>
                         </article>
                         <article className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 text-zinc-900">
-                            <p className="text-sm font-medium">3. Continue</p>
+                            <p className="text-sm font-medium">3. Revisit</p>
                             <p className="mt-2 text-sm leading-6 text-zinc-600">
-                                After submit, your Quran Moment opens like
-                                before.
+                                Return to recent sessions anytime from your
+                                history.
                             </p>
                         </article>
                     </div>
