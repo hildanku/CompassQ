@@ -5,7 +5,12 @@ import { getLocalDateInTimeZone } from '@/lib/utils'
 export async function getTodayCheckIn({
     supabase,
     userId,
-}: ServiceContext): Promise<{ exists: boolean; hasCompletedSession: boolean }> {
+}: ServiceContext): Promise<{
+    exists: boolean
+    hasCompletedSession: boolean
+    checkInId: string | null
+    sessionId: string | null
+}> {
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('timezone')
@@ -31,13 +36,13 @@ export async function getTodayCheckIn({
     }
 
     if (!existingCheckIn) {
-        return { exists: false, hasCompletedSession: false }
+        return { exists: false, hasCompletedSession: false, checkInId: null, sessionId: null }
     }
 
     const { data: existingSession, error: existingSessionError } =
         await supabase
             .from('sessions')
-            .select('completed')
+            .select('id, completed')
             .eq('user_id', userId)
             .eq('check_in_id', existingCheckIn.id)
             .order('created_at', { ascending: false })
@@ -51,6 +56,8 @@ export async function getTodayCheckIn({
     return {
         exists: true,
         hasCompletedSession: existingSession?.completed ?? false,
+        checkInId: existingCheckIn.id,
+        sessionId: existingSession?.id ?? null,
     }
 }
 

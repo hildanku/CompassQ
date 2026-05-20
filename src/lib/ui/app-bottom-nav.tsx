@@ -1,5 +1,6 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import {
     BarChart3,
     History,
@@ -10,6 +11,11 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+
+import {
+    fetchTodayCheckIn,
+    todayCheckInQueryKey,
+} from '@/lib/queries/moments'
 
 type NavItem = {
     href: string
@@ -56,6 +62,14 @@ const rightItems = navItems.slice(2)
 export function AppBottomNav({ onCheckIn, checkInDisabled }: AppBottomNavProps) {
     const pathname = usePathname()
 
+    const todayCheckInQuery = useQuery({
+        queryKey: todayCheckInQueryKey,
+        queryFn: fetchTodayCheckIn,
+    })
+
+    const isDisabled =
+        checkInDisabled ?? todayCheckInQuery.data?.exists ?? false
+
     function renderNavItem(item: NavItem) {
         const isActive = item.isActive(pathname)
         const Icon = item.icon
@@ -98,10 +112,10 @@ export function AppBottomNav({ onCheckIn, checkInDisabled }: AppBottomNavProps) 
                     <button
                         type="button"
                         onClick={onCheckIn}
-                        disabled={checkInDisabled}
+                        disabled={isDisabled}
                         data-tour="floating-checkin"
                         className={`-translate-y-4 flex flex-col items-center justify-center gap-1 rounded-2xl px-5 py-3 text-xs font-semibold shadow-2xl transition ${
-                            checkInDisabled
+                            isDisabled
                                 ? 'cursor-not-allowed bg-zinc-100 text-zinc-400 shadow-zinc-950/10'
                                 : 'bg-emerald-600 text-white shadow-emerald-950/25 hover:bg-emerald-700'
                         }`}

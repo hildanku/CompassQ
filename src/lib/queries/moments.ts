@@ -65,6 +65,8 @@ type HistoryResponse = {
 export type TodayCheckInResponse = {
     exists: boolean
     hasCompletedSession: boolean
+    checkInId: string | null
+    sessionId: string | null
 }
 
 export const todayCheckInQueryKey = ['check-ins', 'today'] as const
