@@ -184,6 +184,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
         reflectionStep,
         submittedReflectionLength,
         completionSummary,
+        resonanceScore,
+        setResonanceScore,
         isSubmitting,
         isSavingReflection,
         shouldShowLoadingSkeleton,
@@ -292,6 +294,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 submittedReflectionLength
                             }
                             completionSummary={completionSummary}
+                            resonanceScore={resonanceScore}
                             isSavingReflection={isSavingReflection}
                             onReflectionDraftChange={
                                 handleReflectionDraftChange
@@ -301,6 +304,7 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                                 handleWriteAnotherReflection
                             }
                             onStartAnotherCheckIn={handleStartAnotherCheckIn}
+                            onResonanceScoreChange={setResonanceScore}
                         />
                     </section>
                 </div>

@@ -150,11 +150,15 @@ export async function createReflection(sessionId: string, content: string) {
     return payload.data
 }
 
-export async function completeSession(sessionId: string) {
+export async function completeSession(sessionId: string, resonanceScore?: number | null) {
     const payload = await apiFetch<SessionCompletionResponse>(
         `/api/v1/sessions/${sessionId}/complete`,
         {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ resonanceScore: resonanceScore ?? null }),
         },
     )
 

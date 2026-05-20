@@ -2,6 +2,7 @@
 
 import { type SessionCompletionResponse } from '@/lib/queries/moments'
 import { FeedbackMessage } from '@/lib/ui/feedback'
+import { ResonanceRating } from './resonance-rating'
 
 export function ReflectionSection({
     reflectionDraft,
@@ -9,22 +10,26 @@ export function ReflectionSection({
     reflectionStep,
     submittedReflectionLength,
     completionSummary,
+    resonanceScore,
     isSavingReflection,
     onReflectionDraftChange,
     onSubmitReflection,
     onWriteAnotherReflection,
     onStartAnotherCheckIn,
+    onResonanceScoreChange,
 }: {
     reflectionDraft: string
     reflectionError: string | null
     reflectionStep: 'compose' | 'next'
     submittedReflectionLength: number | null
     completionSummary: SessionCompletionResponse['streak'] | null
+    resonanceScore: number | null
     isSavingReflection: boolean
     onReflectionDraftChange: (value: string) => void
     onSubmitReflection: () => void
     onWriteAnotherReflection: () => void
     onStartAnotherCheckIn: () => void
+    onResonanceScoreChange: (score: number | null) => void
 }) {
     return (
         <section className="mt-6 rounded-[1.75rem] border border-zinc-200 bg-white p-5 sm:p-6">
@@ -67,6 +72,12 @@ export function ReflectionSection({
                                 : 'Keep it short and simple.'}
                         </p>
                     </div>
+
+                    <ResonanceRating
+                        value={resonanceScore}
+                        onChange={onResonanceScoreChange}
+                        disabled={isSavingReflection}
+                    />
 
                     {reflectionError ? (
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">

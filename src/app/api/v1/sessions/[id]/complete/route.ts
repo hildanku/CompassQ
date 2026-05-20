@@ -13,6 +13,10 @@ const routeParamsSchema = z.object({
     id: z.uuid(),
 })
 
+const bodySchema = z.object({
+    resonanceScore: z.number().int().min(1).max(5).nullish(),
+})
+
 type RouteContext = {
     params: Promise<{ id: string }>
 }
@@ -32,6 +36,25 @@ export async function POST(request: Request, context: RouteContext) {
         return validationErrorJson(parsedParams.error, requestId)
     }
 
+    let resonanceScore: number | null | undefined = undefined
+
+    try {
+        const rawBody = await request.text()
+
+        if (rawBody.length > 0) {
+            const json = JSON.parse(rawBody)
+            const parsedBody = bodySchema.safeParse(json)
+
+            if (!parsedBody.success) {
+                return validationErrorJson(parsedBody.error, requestId)
+            }
+
+            resonanceScore = parsedBody.data.resonanceScore
+        }
+    } catch {
+        // Empty body is fine - resonanceScore stays undefined
+    }
+
     try {
         const data = await completeSession(
             {
@@ -39,6 +62,7 @@ export async function POST(request: Request, context: RouteContext) {
                 userId: auth.user.id,
             },
             parsedParams.data.id,
+            resonanceScore,
         )
 
         return apiSuccess(data, 'Session completed', { status: 200, requestId })

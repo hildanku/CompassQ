@@ -26,6 +26,55 @@ type CandidateRow = {
     priority: number
 }
 
+type ResonanceWeight = {
+    category: string
+    avg_resonance: number
+}
+
+async function loadCategoryResonanceWeights(
+    supabase: SupabaseClient,
+    userId: string,
+) {
+    const thirtyDaysAgo = new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000,
+    ).toISOString()
+
+    const { data, error } = await supabase
+        .from('sessions')
+        .select('check_ins!inner(category), resonance_score')
+        .eq('user_id', userId)
+        .eq('completed', true)
+        .not('resonance_score', 'is', null)
+        .gte('created_at', thirtyDaysAgo)
+
+    if (error || !data) {
+        return new Map<string, number>()
+    }
+
+    const categoryScores = new Map<string, number[]>()
+
+    for (const row of data as unknown as Array<{
+        check_ins: { category: string } | null
+        resonance_score: number
+    }>) {
+        const category = row.check_ins?.category
+        if (!category) continue
+
+        const scores = categoryScores.get(category) ?? []
+        scores.push(row.resonance_score)
+        categoryScores.set(category, scores)
+    }
+
+    const weights = new Map<string, number>()
+
+    for (const [category, scores] of categoryScores) {
+        const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length
+        weights.set(category, avg)
+    }
+
+    return weights
+}
+
 type CachedReferenceRow = {
     ayah_key: string
     surah_number: number
@@ -256,9 +305,10 @@ export async function recommendMoment(
         }
     }
 
-    const [loadedCandidates, lastAyahKey] = await Promise.all([
+    const [loadedCandidates, lastAyahKey, resonanceWeights] = await Promise.all([
         loadCandidates(supabase, (checkIn as CheckInRow).category),
         loadLastSessionAyahKey(supabase, userId),
+        loadCategoryResonanceWeights(supabase, userId),
     ])
 
     const candidates = reorderCandidates(loadedCandidates, lastAyahKey)
@@ -267,10 +317,32 @@ export async function recommendMoment(
         throw new ServiceError(404, 'No ayah recommendation is configured')
     }
 
+    // Apply resonance-based weighted selection if we have enough data
+    const categoryWeight = resonanceWeights.get(
+        (checkIn as CheckInRow).category,
+    )
+    const shouldUseWeightedSelection =
+        categoryWeight != null && categoryWeight >= 3.5 && candidates.length > 1
+
+    let orderedCandidates = candidates
+
+    if (shouldUseWeightedSelection) {
+        // Boost candidates from high-resonance categories by moving them to the front
+        // This creates a soft preference without eliminating variety
+        const shuffled = [...candidates]
+        // Fisher-Yates partial shuffle: randomize within the top half
+        const midpoint = Math.ceil(shuffled.length / 2)
+        for (let i = midpoint - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1))
+            ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        orderedCandidates = shuffled
+    }
+
     let chosenAyah: Awaited<ReturnType<typeof resolveAyahPayload>> | null = null
     let firstAttemptError: unknown
 
-    for (const [index, candidate] of candidates.entries()) {
+    for (const [index, candidate] of orderedCandidates.entries()) {
         try {
             chosenAyah = await resolveAyahPayload(supabase, candidate.ayah_key)
             break

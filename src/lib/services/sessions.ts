@@ -12,6 +12,7 @@ function diffInDays(fromDate: string, toDate: string) {
 export async function completeSession(
     { supabase, userId }: ServiceContext,
     sessionId: string,
+    resonanceScore?: number | null,
 ) {
     const { data: session, error: sessionError } = await supabase
         .from('sessions')
@@ -113,9 +114,21 @@ export async function completeSession(
     }
 
     if (!session.completed) {
+        const updatePayload: { completed: boolean; resonance_score?: number } = {
+            completed: true,
+        }
+
+        if (
+            resonanceScore != null &&
+            resonanceScore >= 1 &&
+            resonanceScore <= 5
+        ) {
+            updatePayload.resonance_score = resonanceScore
+        }
+
         const { error: updateSessionError } = await supabase
             .from('sessions')
-            .update({ completed: true })
+            .update(updatePayload)
             .eq('id', session.id)
             .eq('user_id', userId)
 

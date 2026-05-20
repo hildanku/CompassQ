@@ -11,6 +11,14 @@ export type WeeklyInsightAyah = {
     count: number
 }
 
+export type ResonanceInsight = {
+    averageScore: number | null
+    totalRated: number
+    highestAyahKey: string | null
+    highestScore: number | null
+    categoryAverages: Array<{ category: CheckInCategory; avg: number }>
+}
+
 export type WeeklyInsights = {
     weekStart: string
     weekEnd: string
@@ -18,6 +26,7 @@ export type WeeklyInsights = {
     topCategories: WeeklyInsightCategory[]
     topAyahKeys: WeeklyInsightAyah[]
     reflectionCount: number
+    resonance: ResonanceInsight
 }
 
 type WeeklyInsightsResponse = WeeklyInsights

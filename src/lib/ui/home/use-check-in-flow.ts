@@ -41,6 +41,7 @@ type ReflectionComposerState = {
     submittedReflectionLength: number | null
     savedReflectionForSessionId: string | null
     completionSummary: SessionCompletionResponse['streak'] | null
+    resonanceScore: number | null
     handleReflectionDraftChange: (value: string) => void
     handleWriteAnotherReflection: () => void
     resetReflectionComposer: (sessionId?: string) => void
@@ -48,6 +49,7 @@ type ReflectionComposerState = {
     markSessionCompleted: (
         completion: SessionCompletionResponse['streak'],
     ) => void
+    setResonanceScore: (score: number | null) => void
 }
 
 function getReflectionDraftStorageKey(sessionId: string) {
@@ -91,6 +93,7 @@ function useReflectionDraftPersistence(
     const [completionSummary, setCompletionSummary] = useState<
         SessionCompletionResponse['streak'] | null
     >(null)
+    const [resonanceScore, setResonanceScore] = useState<number | null>(null)
 
     function resetReflectionComposer(sessionId?: string) {
         setReflectionDraft(getStoredReflectionDraft(sessionId))
@@ -99,6 +102,7 @@ function useReflectionDraftPersistence(
         setSubmittedReflectionLength(null)
         setSavedReflectionForSessionId(null)
         setCompletionSummary(null)
+        setResonanceScore(null)
     }
 
     function markReflectionSaved(sessionId: string, content: string) {
@@ -151,11 +155,13 @@ function useReflectionDraftPersistence(
         submittedReflectionLength,
         savedReflectionForSessionId,
         completionSummary,
+        resonanceScore,
         handleReflectionDraftChange,
         handleWriteAnotherReflection,
         resetReflectionComposer,
         markReflectionSaved,
         markSessionCompleted,
+        setResonanceScore,
     }
 }
 
@@ -229,7 +235,8 @@ export function useCheckInFlow() {
     })
 
     const completeSessionMutation = useMutation({
-        mutationFn: completeSession,
+        mutationFn: ({ sessionId, resonanceScore }: { sessionId: string; resonanceScore?: number | null }) =>
+            completeSession(sessionId, resonanceScore),
         onSuccess: async (completion) => {
             reflection.markSessionCompleted(completion.streak)
             await queryClient.invalidateQueries({
@@ -296,9 +303,10 @@ export function useCheckInFlow() {
 
         try {
             if (reflection.savedReflectionForSessionId === activeMoment.sessionId) {
-                await completeSessionMutation.mutateAsync(
-                    activeMoment.sessionId,
-                )
+                await completeSessionMutation.mutateAsync({
+                    sessionId: activeMoment.sessionId,
+                    resonanceScore: reflection.resonanceScore,
+                })
                 return
             }
 
@@ -306,7 +314,10 @@ export function useCheckInFlow() {
                 sessionId: activeMoment.sessionId,
                 content: reflection.reflectionDraft,
             })
-            await completeSessionMutation.mutateAsync(activeMoment.sessionId)
+            await completeSessionMutation.mutateAsync({
+                sessionId: activeMoment.sessionId,
+                resonanceScore: reflection.resonanceScore,
+            })
         } catch {
             // Error state is already handled by the mutation callback.
         }
@@ -322,6 +333,8 @@ export function useCheckInFlow() {
         reflectionStep: reflection.reflectionStep,
         submittedReflectionLength: reflection.submittedReflectionLength,
         completionSummary: reflection.completionSummary,
+        resonanceScore: reflection.resonanceScore,
+        setResonanceScore: reflection.setResonanceScore,
         isSubmitting:
             createCheckInMutation.isPending ||
             recommendMomentMutation.isPending,

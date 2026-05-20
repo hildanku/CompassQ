@@ -227,6 +227,96 @@ export function WeeklyInsightsDashboard({
                                 )}
                             </section>
                         </div>
+
+                        {weeklyInsights.resonance ? (
+                            <section className="rounded-[1.75rem] border border-emerald-100/70 bg-white/68 p-5">
+                                <div className="space-y-2">
+                                    <p className="text-sm font-medium uppercase tracking-[0.16em] text-emerald-700">
+                                        Resonance report
+                                    </p>
+                                    <h3 className="text-xl font-semibold tracking-tight text-zinc-950">
+                                        What moved you most.
+                                    </h3>
+                                </div>
+
+                                {weeklyInsights.resonance.totalRated === 0 ? (
+                                    <p className="mt-4 text-sm leading-6 text-zinc-600">
+                                        {isViewingCurrentWeek
+                                            ? 'No resonance scores recorded yet this week. Rate how deeply a verse resonates after your next session.'
+                                            : `No resonance data was recorded for ${formatUtcDateRange(weeklyInsights.weekStart, weeklyInsights.weekEnd)}.`}
+                                    </p>
+                                ) : (
+                                    <div className="mt-4 space-y-4">
+                                        <div className="grid gap-3 sm:grid-cols-3">
+                                            <article className="rounded-2xl border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,244,245,0.9))] px-4 py-3">
+                                                <p className="text-sm text-zinc-500">
+                                                    Average
+                                                </p>
+                                                <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
+                                                    {weeklyInsights.resonance.averageScore}/5
+                                                </p>
+                                            </article>
+                                            <article className="rounded-2xl border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,244,245,0.9))] px-4 py-3">
+                                                <p className="text-sm text-zinc-500">
+                                                    Sessions rated
+                                                </p>
+                                                <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
+                                                    {weeklyInsights.resonance.totalRated}
+                                                </p>
+                                            </article>
+                                            {weeklyInsights.resonance.highestAyahKey ? (
+                                                <article className="rounded-2xl border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(244,244,245,0.9))] px-4 py-3">
+                                                    <p className="text-sm text-zinc-500">
+                                                        Most resonant
+                                                    </p>
+                                                    <p className="mt-1 text-lg font-semibold tracking-tight text-zinc-950">
+                                                        Ayah {weeklyInsights.resonance.highestAyahKey}
+                                                    </p>
+                                                    <p className="text-sm text-emerald-600">
+                                                        {weeklyInsights.resonance.highestScore}/5
+                                                    </p>
+                                                </article>
+                                            ) : null}
+                                        </div>
+
+                                        {weeklyInsights.resonance.categoryAverages.length > 0 ? (
+                                            <div className="space-y-2">
+                                                <p className="text-sm font-medium text-zinc-700">
+                                                    Resonance by category
+                                                </p>
+                                                <div className="grid gap-2">
+                                                    {weeklyInsights.resonance.categoryAverages.map(
+                                                        (item) => (
+                                                            <div
+                                                                key={item.category}
+                                                                className="flex items-center justify-between rounded-xl border border-zinc-100 bg-white px-4 py-2"
+                                                            >
+                                                                <p className="text-sm text-zinc-900">
+                                                                    {checkInCategoryLabels[item.category as keyof typeof checkInCategoryLabels] ?? item.category}
+                                                                </p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-2 w-16 overflow-hidden rounded-full bg-zinc-100">
+                                                                        <div
+                                                                            className="h-full rounded-full bg-emerald-500"
+                                                                            style={{
+                                                                                width: `${(item.avg / 5) * 100}%`,
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    <p className="text-sm font-medium text-zinc-600">
+                                                                        {item.avg}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </section>
+                        ) : null}
                     </div>
                 ) : null}
             </section>

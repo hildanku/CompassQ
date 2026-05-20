@@ -8,6 +8,7 @@ type CheckInCategory = (typeof checkInCategoryValues)[number]
 type SessionInsightRow = {
     id: string
     ayah_key: string
+    resonance_score: number | null
     check_ins: {
         local_date: string
         category: CheckInCategory
@@ -18,6 +19,82 @@ function sortEntriesByCount<T extends { count: number }>(entries: T[]) {
     return entries.sort((left, right) => right.count - left.count)
 }
 
+export type ResonanceInsight = {
+    averageScore: number | null
+    totalRated: number
+    highestAyahKey: string | null
+    highestScore: number | null
+    categoryAverages: Array<{ category: CheckInCategory; avg: number }>
+}
+
+function computeResonanceInsights(
+    sessions: SessionInsightRow[],
+): ResonanceInsight {
+    const ratedSessions = sessions.filter(
+        (s) => s.resonance_score != null,
+    )
+
+    if (ratedSessions.length === 0) {
+        return {
+            averageScore: null,
+            totalRated: 0,
+            highestAyahKey: null,
+            highestScore: null,
+            categoryAverages: [],
+        }
+    }
+
+    const totalScore = ratedSessions.reduce(
+        (sum, s) => sum + (s.resonance_score ?? 0),
+        0,
+    )
+    const averageScore =
+        Math.round((totalScore / ratedSessions.length) * 10) / 10
+
+    let highestAyahKey: string | null = null
+    let highestScore: number | null = null
+
+    for (const session of ratedSessions) {
+        if (
+            highestScore === null ||
+            (session.resonance_score ?? 0) > highestScore
+        ) {
+            highestScore = session.resonance_score
+            highestAyahKey = session.ayah_key
+        }
+    }
+
+    const categoryScores = new Map<CheckInCategory, number[]>()
+
+    for (const session of ratedSessions) {
+        const category = session.check_ins?.category
+        if (!category) continue
+
+        const scores = categoryScores.get(category) ?? []
+        scores.push(session.resonance_score ?? 0)
+        categoryScores.set(category, scores)
+    }
+
+    const categoryAverages = Array.from(categoryScores.entries())
+        .map(([category, scores]) => ({
+            category,
+            avg:
+                Math.round(
+                    (scores.reduce((sum, s) => sum + s, 0) / scores.length) *
+                        10,
+                ) / 10,
+        }))
+        .sort((a, b) => b.avg - a.avg)
+
+    return {
+        averageScore,
+        totalRated: ratedSessions.length,
+        highestAyahKey,
+        highestScore,
+        categoryAverages,
+    }
+}
+
 export async function getWeeklyInsights(
     { supabase, userId }: ServiceContext,
     weekStart: string,
@@ -26,7 +103,7 @@ export async function getWeeklyInsights(
 
     const { data: sessions, error: sessionsError } = await supabase
         .from('sessions')
-        .select('id, ayah_key, check_ins!inner(local_date, category)')
+        .select('id, ayah_key, resonance_score, check_ins!inner(local_date, category)')
         .eq('user_id', userId)
         .eq('completed', true)
         .gte('check_ins.local_date', weekStart)
@@ -114,6 +191,8 @@ export async function getWeeklyInsights(
         throw new ServiceError(500, 'Failed to store weekly recap')
     }
 
+    const resonance = computeResonanceInsights(typedSessions)
+
     return {
         weekStart,
         weekEnd,
@@ -121,5 +200,6 @@ export async function getWeeklyInsights(
         topCategories,
         topAyahKeys,
         reflectionCount,
+        resonance,
     }
 }
