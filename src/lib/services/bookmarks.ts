@@ -1,4 +1,5 @@
 import { getDatabaseErrorCode } from '@/lib/api-route'
+import { syncBookmarkToQf, syncBookmarkRemovalToQf } from '@/lib/qf/user'
 import { ServiceError } from '@/lib/services/error'
 import type { ServiceContext } from '@/lib/types'
 
@@ -141,6 +142,9 @@ export async function createBookmark(
         throw new ServiceError(500, 'Failed to create bookmark')
     }
 
+    // Fire-and-forget: sync to QF User API (Bookmarks)
+    void syncBookmarkToQf(ayahKey)
+
     return {
         message: 'Bookmark created',
         status: 201,
@@ -166,6 +170,9 @@ export async function removeBookmark(
     if (error) {
         throw new ServiceError(500, 'Failed to remove bookmark')
     }
+
+    // Fire-and-forget: sync removal to QF User API (Bookmarks)
+    void syncBookmarkRemovalToQf(ayahKey)
 
     return {
         ayahKey,

@@ -1,5 +1,6 @@
 import { requireUser } from '@/lib/auth'
 import { ProfileForm } from '@/lib/ui/profile/profile-form'
+import { QfConnectCard } from '@/lib/ui/profile/qf-connect-card'
 import { AppBottomNav } from '@/lib/ui/app-bottom-nav'
 import {
     AuthenticatedPageHeader,
@@ -59,6 +60,7 @@ export default async function ProfilePage() {
                                     : 'Profile row missing'}
                             </dd>
                         </div>
+                        <QfConnectCard />
                     </dl>
                 </div>
 
