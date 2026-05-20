@@ -209,3 +209,44 @@ export async function addCollectionItem(
         },
     }
 }
+
+export async function removeCollectionItem(
+    { supabase, userId }: ServiceContext,
+    collectionId: string,
+    ayahKey: string,
+) {
+    const { data: collection, error: collectionError } = await supabase
+        .from('collections')
+        .select('id')
+        .eq('id', collectionId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    if (collectionError) {
+        throw new ServiceError(500, 'Failed to validate collection')
+    }
+
+    if (!collection) {
+        throw new ServiceError(404, 'Collection not found')
+    }
+
+    const { error } = await supabase
+        .from('collection_items')
+        .delete()
+        .eq('collection_id', collectionId)
+        .eq('ayah_key', ayahKey)
+
+    if (error) {
+        throw new ServiceError(500, 'Failed to remove collection item')
+    }
+
+    return {
+        message: 'Collection item removed',
+        status: 200,
+        data: {
+            collectionId,
+            ayahKey,
+            removed: true,
+        },
+    }
+}

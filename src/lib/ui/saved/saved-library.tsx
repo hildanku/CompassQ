@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
+import { useCallback, useState } from 'react'
 
 import { ApiClientError } from '@/lib/api'
 import {
@@ -12,6 +13,7 @@ import {
     fetchBookmarks,
     fetchCollections,
     removeBookmark,
+    removeCollectionItem,
 } from '@/lib/queries/save-actions'
 import {
     AuthenticatedPageHeader,
@@ -117,6 +119,46 @@ export function SavedLibrary() {
         },
     })
 
+    const [removingItems, setRemovingItems] = useState<Set<string>>(new Set())
+
+    const removeCollectionItemMutation = useMutation({
+        mutationFn: ({
+            collectionId,
+            ayahKey,
+        }: {
+            collectionId: string
+            ayahKey: string
+        }) => removeCollectionItem(collectionId, ayahKey),
+        onMutate: ({ collectionId, ayahKey }) => {
+            setRemovingItems((prev) => {
+                const next = new Set(prev)
+                next.add(`${collectionId}:${ayahKey}`)
+                return next
+            })
+        },
+        onSuccess: async (data) => {
+            feedback.success(`Ayah ${data.ayahKey} removed from collection.`)
+
+            await queryClient.invalidateQueries({
+                queryKey: collectionsQueryKey,
+            })
+        },
+        onError: (error) => {
+            feedback.error(
+                error instanceof ApiClientError
+                    ? error.message
+                    : 'Failed to remove item from collection.',
+            )
+        },
+        onSettled: (_data, _error, variables) => {
+            setRemovingItems((prev) => {
+                const next = new Set(prev)
+                next.delete(`${variables.collectionId}:${variables.ayahKey}`)
+                return next
+            })
+        },
+    })
+
     const bookmarks = bookmarksQuery.data ?? []
     const collections = collectionsQuery.data ?? []
     const selectedAyahAlreadySaved = collections.some((collection) =>
@@ -152,6 +194,17 @@ export function SavedLibrary() {
         feedback.clear()
         void removeBookmarkMutation.mutateAsync(ayahKey)
     }
+
+    const handleRemoveCollectionItem = useCallback(
+        (collectionId: string, ayahKey: string) => {
+            feedback.clear()
+            void removeCollectionItemMutation.mutateAsync({
+                collectionId,
+                ayahKey,
+            })
+        },
+        [feedback, removeCollectionItemMutation],
+    )
 
     return (
         <AuthenticatedPageShell width="wide">
@@ -199,6 +252,8 @@ export function SavedLibrary() {
                     onRetry={() => {
                         void collectionsQuery.refetch()
                     }}
+                    onRemoveItem={handleRemoveCollectionItem}
+                    removingItems={removingItems}
                 />
             </section>
 

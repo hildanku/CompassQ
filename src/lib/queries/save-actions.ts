@@ -69,6 +69,12 @@ type AddCollectionItemResponse = {
     created: boolean
 }
 
+type RemoveCollectionItemResponse = {
+    collectionId: string
+    ayahKey: string
+    removed: boolean
+}
+
 export const bookmarksQueryKey = ['bookmarks'] as const
 export const collectionsQueryKey = ['collections'] as const
 
@@ -193,6 +199,27 @@ export async function addCollectionItem(collectionId: string, ayahKey: string) {
 
     if (!payload.data?.collectionItemId) {
         throw new ApiClientError('Failed to add collection item', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
+export async function removeCollectionItem(
+    collectionId: string,
+    ayahKey: string,
+) {
+    const payload = await apiFetch<RemoveCollectionItemResponse>(
+        `/api/v1/collections/${collectionId}/items/${encodeURIComponent(ayahKey)}`,
+        {
+            method: 'DELETE',
+        },
+    )
+
+    if (!payload.data?.removed) {
+        throw new ApiClientError('Failed to remove collection item', {
             status: 500,
             payload,
         })

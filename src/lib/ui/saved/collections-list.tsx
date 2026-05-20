@@ -10,6 +10,8 @@ type CollectionsListProps = {
     isLoading: boolean
     errorMessage: string | null
     onRetry: () => void
+    onRemoveItem?: (collectionId: string, ayahKey: string) => void
+    removingItems?: Set<string>
 }
 
 export function CollectionsList({
@@ -17,6 +19,8 @@ export function CollectionsList({
     isLoading,
     errorMessage,
     onRetry,
+    onRemoveItem,
+    removingItems,
 }: CollectionsListProps) {
     return (
         <div className="space-y-4">
@@ -77,13 +81,41 @@ export function CollectionsList({
                             </p>
                         ) : (
                             <div className="mt-4 grid gap-4">
-                                {collection.items.map((item) => (
-                                    <SavedAyahCard
-                                        key={item.collectionItemId}
-                                        {...item}
-                                        createdAt={item.createdAt}
-                                    />
-                                ))}
+                                {collection.items.map((item) => {
+                                    const itemKey = `${collection.id}:${item.ayahKey}`
+                                    const isRemoving =
+                                        removingItems?.has(itemKey) ?? false
+
+                                    return (
+                                        <div
+                                            key={item.collectionItemId}
+                                            className="relative"
+                                        >
+                                            <SavedAyahCard
+                                                {...item}
+                                                createdAt={item.createdAt}
+                                            />
+                                            {onRemoveItem ? (
+                                                <button
+                                                    type="button"
+                                                    disabled={isRemoving}
+                                                    onClick={() =>
+                                                        onRemoveItem(
+                                                            collection.id,
+                                                            item.ayahKey,
+                                                        )
+                                                    }
+                                                    className="absolute right-3 top-3 rounded-full border border-red-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm transition hover:bg-red-50 disabled:opacity-50"
+                                                    aria-label={`Remove ayah ${item.ayahKey} from collection`}
+                                                >
+                                                    {isRemoving
+                                                        ? 'Removing...'
+                                                        : 'Remove'}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )}
                     </section>
