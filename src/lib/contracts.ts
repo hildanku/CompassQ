@@ -48,7 +48,7 @@ export const recommendMomentSchema = z.object({
 
 export const createReflectionSchema = z.object({
     sessionId: z.uuid(),
-    content: z.string().trim().max(280),
+    content: z.string().trim().min(1).max(280),
 })
 
 export const createBookmarkSchema = z.object({

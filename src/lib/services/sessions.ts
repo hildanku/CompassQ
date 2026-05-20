@@ -28,6 +28,23 @@ export async function completeSession(
         throw new ServiceError(404, 'Session not found')
     }
 
+    if (session.completed) {
+        const { data: existingStreak } = await supabase
+            .from('streaks')
+            .select('current_streak_days, longest_streak_days')
+            .eq('user_id', userId)
+            .maybeSingle()
+
+        return {
+            sessionId: session.id,
+            completed: true,
+            streak: {
+                current: existingStreak?.current_streak_days ?? 0,
+                longest: existingStreak?.longest_streak_days ?? 0,
+            },
+        }
+    }
+
     const { data: checkIn, error: checkInError } = await supabase
         .from('check_ins')
         .select('local_date')
