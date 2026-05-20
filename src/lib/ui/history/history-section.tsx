@@ -1,9 +1,21 @@
+'use client'
+
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 import { checkInCategoryLabels } from '@/lib/constant'
 import { checkInCategoryValues } from '@/lib/contracts'
-import { getAyahReference } from '@/lib/quran'
+import {
+    echoesQueryKey,
+    fetchEchoes,
+    saveEchoesAsCollection,
+} from '@/lib/queries/echoes'
+import { createBookmark } from '@/lib/queries/save-actions'
 import { type HistorySession } from '@/lib/queries/moments'
+import { getAyahReference } from '@/lib/quran'
+import { EchoesSection } from '@/lib/ui/home/echoes-section'
 import { formatUtcTimestamp } from '@/lib/utils'
 
 type CheckInCategory = (typeof checkInCategoryValues)[number]
@@ -108,71 +120,119 @@ export function HistorySection({
 
             {!isLoading && !message && sessions.length > 0 ? (
                 <div className="mt-5 grid gap-4">
-                    {sessions.map((session) => {
-                        const ayahReference = getAyahReference(session.ayahKey)
-
-                        return (
-                            <article
-                                key={session.sessionId}
-                                className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5"
-                            >
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                    <div className="space-y-1">
-                                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getCategoryColors(session.category)}`}>
-                                            {getCategoryLabel(session.category)}
-                                        </span>
-                                        <h3 className="text-lg font-semibold text-zinc-950">
-                                            {ayahReference
-                                                ? `Surah ${ayahReference.surahName}, Ayah ${ayahReference.ayahNumber}`
-                                                : `Ayah ${session.ayahKey}`}
-                                        </h3>
-                                        {ayahReference ? (
-                                            <p className="text-sm text-zinc-500">
-                                                {ayahReference.surahNumber}:
-                                                {ayahReference.ayahNumber}
-                                            </p>
-                                        ) : null}
-                                    </div>
-                                    <div className="text-right text-sm text-zinc-500">
-                                        <p>
-                                            {formatUtcTimestamp(
-                                                session.createdAt,
-                                            )}
-                                        </p>
-                                        <p>
-                                            {session.completed
-                                                ? 'Completed'
-                                                : 'In progress'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 rounded-3xl border border-white/90 bg-white/88 p-4 text-sm leading-6 text-zinc-700">
-                                    <p className="font-medium text-zinc-900">
-                                        Latest reflection
-                                    </p>
-                                    <p className="mt-2">
-                                        {session.latestReflection
-                                            ? session.latestReflection
-                                                  .content ||
-                                              'Empty reflection saved.'
-                                            : 'No reflection saved for this session yet.'}
-                                    </p>
-                                </div>
-
-                                <div className="mt-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                                    <p>
-                                        {session.reflectionCount} reflection
-                                        {session.reflectionCount === 1
-                                            ? ''
-                                            : 's'}
-                                    </p>
-                                </div>
-                            </article>
-                        )
-                    })}
+                    {sessions.map((session) => (
+                        <HistoryCard
+                            key={session.sessionId}
+                            session={session}
+                        />
+                    ))}
                 </div>
             ) : null}
         </section>
+    )
+}
+
+function HistoryCard({ session }: { session: HistorySession }) {
+    const [echoesOpen, setEchoesOpen] = useState(false)
+    const [collectionSaved, setCollectionSaved] = useState(false)
+
+    const ayahReference = getAyahReference(session.ayahKey)
+
+    const echoesQuery = useQuery({
+        queryKey: echoesQueryKey(session.sessionId),
+        queryFn: () => fetchEchoes(session.sessionId),
+        enabled: echoesOpen,
+    })
+
+    const bookmarkMutation = useMutation({
+        mutationFn: createBookmark,
+    })
+
+    const saveCollectionMutation = useMutation({
+        mutationFn: () =>
+            saveEchoesAsCollection(
+                session.sessionId,
+                echoesQuery.data?.echoes.map((e) => e.ayahKey) ?? [],
+            ),
+        onSuccess: () => setCollectionSaved(true),
+    })
+
+    return (
+        <article className="rounded-[1.75rem] border border-emerald-100/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(250,250,249,0.94))] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                    <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getCategoryColors(session.category)}`}
+                    >
+                        {getCategoryLabel(session.category)}
+                    </span>
+                    <h3 className="text-lg font-semibold text-zinc-950">
+                        {ayahReference
+                            ? `Surah ${ayahReference.surahName}, Ayah ${ayahReference.ayahNumber}`
+                            : `Ayah ${session.ayahKey}`}
+                    </h3>
+                    {ayahReference ? (
+                        <p className="text-sm text-zinc-500">
+                            {ayahReference.surahNumber}:
+                            {ayahReference.ayahNumber}
+                        </p>
+                    ) : null}
+                </div>
+                <div className="text-right text-sm text-zinc-500">
+                    <p>{formatUtcTimestamp(session.createdAt)}</p>
+                    <p>{session.completed ? 'Completed' : 'In progress'}</p>
+                </div>
+            </div>
+
+            <div className="mt-4 rounded-3xl border border-white/90 bg-white/88 p-4 text-sm leading-6 text-zinc-700">
+                <p className="font-medium text-zinc-900">Latest reflection</p>
+                <p className="mt-2">
+                    {session.latestReflection
+                        ? session.latestReflection.content ||
+                        'Empty reflection saved.'
+                        : 'No reflection saved for this session yet.'}
+                </p>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between">
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+                    {session.reflectionCount} reflection
+                    {session.reflectionCount === 1 ? '' : 's'}
+                </p>
+
+                {session.completed ? (
+                    <button
+                        type="button"
+                        onClick={() => setEchoesOpen(!echoesOpen)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100"
+                    >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Explore Echoes
+                        {echoesOpen ? (
+                            <ChevronUp className="h-3 w-3" />
+                        ) : (
+                            <ChevronDown className="h-3 w-3" />
+                        )}
+                    </button>
+                ) : null}
+            </div>
+
+            {echoesOpen ? (
+                <div className="mt-4">
+                    <EchoesSection
+                        echoes={echoesQuery.data?.echoes ?? []}
+                        isLoading={echoesQuery.isLoading}
+                        isSavingCollection={saveCollectionMutation.isPending}
+                        collectionSaved={collectionSaved}
+                        onBookmark={(ayahKey) => {
+                            void bookmarkMutation.mutateAsync(ayahKey)
+                        }}
+                        onSaveAsCollection={() => {
+                            void saveCollectionMutation.mutateAsync()
+                        }}
+                    />
+                </div>
+            ) : null}
+        </article>
     )
 }
