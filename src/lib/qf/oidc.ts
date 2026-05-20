@@ -5,29 +5,11 @@
 
 import { cookies } from 'next/headers'
 
-// --- Config ---
+import type { QfEnvironment, QfOidcConfig, QfTokenResponse } from './types'
+import { QF_OAUTH_BASE_URLS, QF_USER_API_BASE_URLS } from './constants'
+import { createBasicAuth } from './utils'
 
-type QfOidcEnvironment = 'prelive' | 'production'
-
-type QfOidcConfig = {
-    clientId: string
-    clientSecret: string
-    environment: QfOidcEnvironment
-    oauthBaseUrl: string
-    apiBaseUrl: string
-    redirectUri: string
-    scope: string
-}
-
-const oauthBaseUrls: Record<QfOidcEnvironment, string> = {
-    prelive: 'https://prelive-oauth2.quran.foundation',
-    production: 'https://oauth2.quran.foundation',
-}
-
-const apiBaseUrls: Record<QfOidcEnvironment, string> = {
-    prelive: 'https://apis-prelive.quran.foundation/auth',
-    production: 'https://apis.quran.foundation/auth',
-}
+// Config
 
 export function getQfOidcConfig(): QfOidcConfig | null {
     const clientId = process.env.QF_USER_CLIENT_ID?.trim()
@@ -37,7 +19,7 @@ export function getQfOidcConfig(): QfOidcConfig | null {
         return null
     }
 
-    const environment: QfOidcEnvironment =
+    const environment: QfEnvironment =
         process.env.QF_USER_ENV === 'production' ? 'production' : 'prelive'
 
     const appUrl =
@@ -50,14 +32,14 @@ export function getQfOidcConfig(): QfOidcConfig | null {
         clientId,
         clientSecret,
         environment,
-        oauthBaseUrl: oauthBaseUrls[environment],
-        apiBaseUrl: apiBaseUrls[environment],
+        oauthBaseUrl: QF_OAUTH_BASE_URLS[environment],
+        apiBaseUrl: QF_USER_API_BASE_URLS[environment],
         redirectUri: `${appUrl}/api/auth/qf/callback`,
         scope: 'openid offline_access bookmark',
     }
 }
 
-// --- PKCE ---
+//  PKCE
 
 export function generateRandomString(length = 43): string {
     const bytes = new Uint8Array(length)
@@ -82,15 +64,7 @@ function base64UrlEncode(bytes: Uint8Array): string {
     return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-// --- Token Exchange ---
-
-type QfTokenResponse = {
-    access_token: string
-    refresh_token?: string
-    id_token?: string
-    expires_in: number
-    token_type: string
-}
+// Token Exchange
 
 export async function exchangeCodeForTokens(
     code: string,
@@ -102,9 +76,7 @@ export async function exchangeCodeForTokens(
         throw new Error('QF OIDC is not configured')
     }
 
-    const basicAuth = Buffer.from(
-        `${config.clientId}:${config.clientSecret}`,
-    ).toString('base64')
+    const basicAuth = createBasicAuth(config.clientId, config.clientSecret)
 
     const body = new URLSearchParams({
         grant_type: 'authorization_code',
@@ -141,9 +113,7 @@ export async function refreshAccessToken(
         throw new Error('QF OIDC is not configured')
     }
 
-    const basicAuth = Buffer.from(
-        `${config.clientId}:${config.clientSecret}`,
-    ).toString('base64')
+    const basicAuth = createBasicAuth(config.clientId, config.clientSecret)
 
     const body = new URLSearchParams({
         grant_type: 'refresh_token',
@@ -166,7 +136,7 @@ export async function refreshAccessToken(
     return (await response.json()) as QfTokenResponse
 }
 
-// --- Cookie-based session ---
+// Cookie-based session
 
 const QF_ACCESS_TOKEN_COOKIE = 'qf_access_token'
 const QF_REFRESH_TOKEN_COOKIE = 'qf_refresh_token'

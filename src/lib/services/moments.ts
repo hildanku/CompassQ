@@ -4,7 +4,7 @@ import {
     fetchQfAyahByKey,
     getCachedAyahPayload,
     getQfContentConfig,
-} from '@/lib/qf-content'
+} from '@/lib/qf/content'
 import { ServiceError } from '@/lib/services/error'
 import type { ServiceContext } from '@/lib/types'
 

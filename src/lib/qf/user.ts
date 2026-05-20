@@ -10,15 +10,10 @@
  */
 
 import { getQfAccessToken, getQfOidcConfig } from '@/lib/qf/oidc'
+import type { QfTokenCache } from './types'
+import { createBasicAuth, parseAyahKey, sleep } from './utils'
 
-// --- Client Credentials Fallback ---
-
-type ClientCredentialsCache = {
-    accessToken: string
-    expiresAt: number
-}
-
-let ccTokenCache: ClientCredentialsCache | null = null
+let ccTokenCache: QfTokenCache | null = null
 
 async function fetchClientCredentialsToken(): Promise<string | null> {
     const config = getQfOidcConfig()
@@ -31,9 +26,7 @@ async function fetchClientCredentialsToken(): Promise<string | null> {
         return ccTokenCache.accessToken
     }
 
-    const basicAuth = Buffer.from(
-        `${config.clientId}:${config.clientSecret}`,
-    ).toString('base64')
+    const basicAuth = createBasicAuth(config.clientId, config.clientSecret)
 
     try {
         const response = await fetch(`${config.oauthBaseUrl}/oauth2/token`, {
@@ -72,8 +65,6 @@ async function fetchClientCredentialsToken(): Promise<string | null> {
     }
 }
 
-// --- Unified Token Resolution ---
-
 type TokenSource = 'oidc' | 'client_credentials' | null
 
 async function resolveQfToken(): Promise<{
@@ -93,12 +84,6 @@ async function resolveQfToken(): Promise<{
     }
 
     return { token: null, source: null }
-}
-
-// --- API Fetch ---
-
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 async function qfUserFetch(
@@ -158,16 +143,6 @@ async function qfUserFetch(
     }
 
     return { response: null, source }
-}
-
-// --- Public API ---
-
-function parseAyahKey(ayahKey: string) {
-    const [surahStr, ayahStr] = ayahKey.split(':')
-    return {
-        surahNumber: Number.parseInt(surahStr ?? '', 10),
-        ayahNumber: Number.parseInt(ayahStr ?? '', 10),
-    }
 }
 
 /**

@@ -1,96 +1,38 @@
-type QfContentEnvironment = 'prelive' | 'production'
+/**
+ * Quran Foundation Content API integration.
+ * Fetches verse text, translations, tafsir, and audio from QF Content API.
+ */
 
-type QfContentConfig = {
-    clientId: string
-    clientSecret: string
-    environment: QfContentEnvironment
-    authBaseUrl: string
-    apiBaseUrl: string
-    translationResourceId: number
-    tafsirResourceId: number
-    recitationId: number
-}
+import type {
+    QfContentConfig,
+    QfEnvironment,
+    QfTokenCache,
+    QfVerseResponse,
+    CachedAyahReference,
+    QfAyahPayload,
+} from './types'
+import {
+    QF_OAUTH_BASE_URLS,
+    QF_CONTENT_API_BASE_URLS,
+    QF_CONTENT_DEFAULTS,
+} from './constants'
+import {
+    createBasicAuth,
+    parseAyahKey,
+    sleep,
+    stripHtml,
+    toTafsirSnippet,
+    getAbsoluteAudioUrl,
+} from './utils'
 
-type QfTokenCache = {
-    accessToken: string
-    expiresAt: number
-}
-
-type QfVerseResponse = {
-    verse?: {
-        chapter_id?: number
-        verse_number?: number
-        verse_key?: string
-        text_uthmani?: string
-        audio?: {
-            url?: string
-        }
-        translations?: Array<{
-            text?: string
-        }>
-        tafsirs?: Array<{
-            text?: string
-        }>
-    }
-}
-
-function parseAyahKey(ayahKey: string) {
-    const [surahNumberText, ayahNumberText] = ayahKey.split(':')
-    const surahNumber = Number.parseInt(surahNumberText ?? '', 10)
-    const ayahNumber = Number.parseInt(ayahNumberText ?? '', 10)
-
-    if (!Number.isInteger(surahNumber) || !Number.isInteger(ayahNumber)) {
-        throw new Error(`Invalid ayah key: ${ayahKey}`)
-    }
-
-    return {
-        surahNumber,
-        ayahNumber,
-    }
-}
-
-type CachedAyahReference = {
-    ayah_key: string
-    surah_number: number
-    ayah_number: number
-    arabic_text: string | null
-    translation_text: string | null
-    tafsir_snippet: string | null
-    audio_url: string | null
-}
-
-type QfAyahPayload = {
-    ayahKey: string
-    surahNumber: number
-    ayahNumber: number
-    arabicText: string
-    translation: string
-    tafsirSnippet: string
-    audioUrl: string
-}
-
-const qfContentAuthBaseUrls: Record<QfContentEnvironment, string> = {
-    prelive: 'https://prelive-oauth2.quran.foundation',
-    production: 'https://oauth2.quran.foundation',
-}
-
-const qfContentApiBaseUrls: Record<QfContentEnvironment, string> = {
-    prelive: 'https://apis-prelive.quran.foundation/content/api/v4',
-    production: 'https://apis.quran.foundation/content/api/v4',
-}
-
-const qfDefaultConfig = {
-    translationResourceId: 131,
-    tafsirResourceId: 169,
-    recitationId: 1,
-}
+// Config
 
 let tokenCache: QfTokenCache | null = null
 
 function readQfContentConfig(): QfContentConfig | null {
     const clientId = process.env.QF_CONTENT_CLIENT_ID?.trim()
     const clientSecret = process.env.QF_CONTENT_CLIENT_SECRET?.trim()
-    const environment =
+    const environment: QfEnvironment =
         process.env.QF_CONTENT_ENV === 'prelive' ? 'prelive' : 'production'
 
     if (!clientId || !clientSecret) {
@@ -101,21 +43,21 @@ function readQfContentConfig(): QfContentConfig | null {
         clientId,
         clientSecret,
         environment,
-        authBaseUrl: qfContentAuthBaseUrls[environment],
-        apiBaseUrl: qfContentApiBaseUrls[environment],
+        authBaseUrl: QF_OAUTH_BASE_URLS[environment],
+        apiBaseUrl: QF_CONTENT_API_BASE_URLS[environment],
         translationResourceId:
             Number.parseInt(
                 process.env.QF_CONTENT_TRANSLATION_RESOURCE_ID ?? '',
                 10,
-            ) || qfDefaultConfig.translationResourceId,
+            ) || QF_CONTENT_DEFAULTS.translationResourceId,
         tafsirResourceId:
             Number.parseInt(
                 process.env.QF_CONTENT_TAFSIR_RESOURCE_ID ?? '',
                 10,
-            ) || qfDefaultConfig.tafsirResourceId,
+            ) || QF_CONTENT_DEFAULTS.tafsirResourceId,
         recitationId:
             Number.parseInt(process.env.QF_CONTENT_RECITATION_ID ?? '', 10) ||
-            qfDefaultConfig.recitationId,
+            QF_CONTENT_DEFAULTS.recitationId,
     }
 }
 
@@ -131,47 +73,7 @@ export function getQfContentConfig() {
     return config
 }
 
-function stripHtml(value: string | undefined) {
-    if (!value) {
-        return ''
-    }
-
-    return value
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/\s+/g, ' ')
-        .trim()
-}
-
-function toTafsirSnippet(value: string | undefined) {
-    const text = stripHtml(value)
-
-    if (text.length <= 420) {
-        return text
-    }
-
-    return `${text.slice(0, 417).trimEnd()}...`
-}
-
-function getAbsoluteAudioUrl(value: string | undefined) {
-    if (!value) {
-        return ''
-    }
-
-    if (value.startsWith('http://') || value.startsWith('https://')) {
-        return value
-    }
-
-    return `https://verses.quran.foundation/${value.replace(/^\/+/, '')}`
-}
-
-function sleep(milliseconds: number) {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds))
-}
-
+// Token
 async function fetchQfContentToken(forceRefresh = false) {
     const config = getQfContentConfig()
 
@@ -183,9 +85,7 @@ async function fetchQfContentToken(forceRefresh = false) {
         return tokenCache.accessToken
     }
 
-    const basicAuth = Buffer.from(
-        `${config.clientId}:${config.clientSecret}`,
-    ).toString('base64')
+    const basicAuth = createBasicAuth(config.clientId, config.clientSecret)
 
     const response = await fetch(`${config.authBaseUrl}/oauth2/token`, {
         method: 'POST',
@@ -222,6 +122,7 @@ async function fetchQfContentToken(forceRefresh = false) {
     return payload.access_token
 }
 
+// Fetch
 async function qfFetch(path: string, query: URLSearchParams) {
     const config = getQfContentConfig()
     let token = await fetchQfContentToken()
@@ -259,6 +160,7 @@ async function qfFetch(path: string, query: URLSearchParams) {
     throw new Error('QF content request failed after retries')
 }
 
+// Public API
 function hasMinimumCachedContent(reference: CachedAyahReference | null) {
     return Boolean(reference?.arabic_text && reference.translation_text)
 }

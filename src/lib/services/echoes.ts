@@ -1,5 +1,5 @@
 import { searchQuran, type SearchQuranResult } from '@/lib/qf/mcp'
-import { fetchQfAyahByKey, getCachedAyahPayload } from '@/lib/qf-content'
+import { fetchQfAyahByKey, getCachedAyahPayload } from '@/lib/qf/content'
 import { getDatabaseErrorCode } from '@/lib/api-route'
 import { ServiceError } from '@/lib/services/error'
 import type { ServiceContext } from '@/lib/types'
