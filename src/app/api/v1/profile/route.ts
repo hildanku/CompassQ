@@ -1,28 +1,20 @@
-import {
-    getServerAuth,
-    serviceUnavailableJson,
-    unauthorizedJson,
-} from '@/lib/auth'
 import { apiError, apiSuccess } from '@/lib/api'
+import { requireApiUser } from '@/lib/api-auth'
 import { getRequestId, parseJsonBody } from '@/lib/api-route'
 import { profileResponseSchema, updateProfileSchema } from '@/lib/contracts'
 
 export async function GET(request: Request) {
     const requestId = getRequestId(request)
-    const { supabase, user, isConfigured } = await getServerAuth()
+    const auth = await requireApiUser(requestId)
 
-    if (!isConfigured || !supabase) {
-        return serviceUnavailableJson(requestId)
+    if ('response' in auth) {
+        return auth.response
     }
 
-    if (!user) {
-        return unauthorizedJson(requestId)
-    }
-
-    const { data, error } = await supabase
+    const { data, error } = await auth.supabase
         .from('profiles')
         .select('id, display_name, timezone, created_at, updated_at')
-        .eq('id', user.id)
+        .eq('id', auth.user.id)
         .single()
 
     if (error) {
@@ -47,14 +39,10 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
     const requestId = getRequestId(request)
-    const { supabase, user, isConfigured } = await getServerAuth()
+    const auth = await requireApiUser(requestId)
 
-    if (!isConfigured || !supabase) {
-        return serviceUnavailableJson(requestId)
-    }
-
-    if (!user) {
-        return unauthorizedJson(requestId)
+    if ('response' in auth) {
+        return auth.response
     }
 
     const parsed = await parseJsonBody(request, updateProfileSchema, requestId)
@@ -68,10 +56,10 @@ export async function PATCH(request: Request) {
         timezone: parsed.data.timezone?.trim() || 'UTC',
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await auth.supabase
         .from('profiles')
         .update(normalizedProfile)
-        .eq('id', user.id)
+        .eq('id', auth.user.id)
         .select('id, display_name, timezone, created_at, updated_at')
         .single()
 
