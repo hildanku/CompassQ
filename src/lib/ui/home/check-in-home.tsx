@@ -16,6 +16,7 @@ import { FeedbackMessage, type Feedback } from '@/lib/ui/feedback'
 import { CheckInAudioPlayer } from './check-in-audio-player'
 import { ReflectionSection } from './reflection-section'
 import { SaveActions } from './save-actions'
+import { StreakWidget } from './streak-widget'
 import { useCheckInFlow } from './use-check-in-flow'
 import { OnboardingTour } from '@/lib/ui/onboarding-tour'
 
@@ -328,6 +329,8 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                             </p>
                         </div>
                     </div>
+
+                    <StreakWidget />
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <button

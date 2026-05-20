@@ -168,6 +168,27 @@ export async function completeSession(sessionId: string) {
     return payload.data
 }
 
+export type StreakResponse = {
+    current: number
+    longest: number
+    lastActiveDate: string | null
+}
+
+export const streakQueryKey = ['streak'] as const
+
+export async function fetchStreak() {
+    const payload = await apiFetch<StreakResponse>('/api/v1/streaks')
+
+    if (!payload.data) {
+        throw new ApiClientError('Failed to load streak', {
+            status: 500,
+            payload,
+        })
+    }
+
+    return payload.data
+}
+
 export async function fetchHistory(limit = 10) {
     const payload = await apiFetch<HistoryResponse>(
         `/api/v1/history?limit=${limit}`,
