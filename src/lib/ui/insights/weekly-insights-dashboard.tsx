@@ -9,6 +9,7 @@ import {
     AuthenticatedPageHeader,
     AuthenticatedPageShell,
 } from '@/lib/ui/authenticated-page-shell'
+import { checkInCategoryLabels } from '@/lib/constant'
 import { addDaysToIsoDate, formatUtcDateRange } from '@/lib/utils'
 import {
     fetchWeeklyInsights,
@@ -168,8 +169,8 @@ export function WeeklyInsightsDashboard({
                                                 >
                                                     <div className="flex items-center justify-between gap-3">
                                                         <p className="text-sm font-medium text-zinc-900">
-                                                            {item.category}
-                                                        </p>
+                                                             {checkInCategoryLabels[item.category as keyof typeof checkInCategoryLabels] ?? item.category}
+                                                         </p>
                                                         <p className="text-sm text-zinc-500">
                                                             {item.count} session
                                                             {item.count === 1
