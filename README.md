@@ -229,21 +229,19 @@ Filter: remove original verse, deduplicate
 Resolve each echo: MCP data → DB cache → QF Content API
         │
         ▼
-Present as horizontal scroll cards:
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│ Echo 1      │  │ Echo 2      │  │ Echo 3      │
-│ At-Talaq    │  │ Al-Insyirah │  │ Al-Mu'minun │
-│ 65:7        │  │ 94:6        │  │ 23:62       │
-│ "Allah does │  │ "With every │  │ "We do not  │
-│  not charge │  │  hardship   │  │  burden any │
-│  a soul..." │  │  there is   │  │  soul beyond│
-│             │  │  relief"    │  │  its means" │
-│ [▶️] [🔖]   │  │ [▶️] [🔖]   │  │ [▶️] [🔖]   │
-└─────────────┘  └─────────────┘  └─────────────┘
+Present as echo card:
+┌─────────────┐
+│ Echo         │
+│ At-Talaq    │
+│ 65:7        │
+│ "Allah does │
+│  not charge │
+│  a soul..." │
+│ [▶️] [🔖]   │
+└─────────────┘
         │
         ▼
-"Save as Collection" → Creates "Anxiety Echoes" collection
-with original verse + all echo verses
+User can bookmark the echo or add to collections via the saved library
 ```
 
 **Why Echoes Transform Engagement:**
@@ -269,7 +267,7 @@ with original verse + all echo verses
 | QF Content API | Feature Mapped | Integration Depth | File Path |
 |----------------|---------------|-------------------|-----------|
 | **Quran API** (verse text, Uthmani) | Quran Moment — Arabic display | Deep: OAuth2 client_credentials, token caching, retry w/ backoff | `src/lib/qf/content.ts` |
-| **Translation API** (Sahih International, resource 131) | Quran Moment — English meaning | Deep: Bundled with verse fetch, cached in DB | `src/lib/qf/content.ts` |
+| **Translation API** (Sahih International) | Quran Moment — English meaning | Deep: Bundled with verse fetch, cached in DB | `src/lib/qf/content.ts` |
 | **Tafsir API** (resource 169) | Quran Moment — Scholarly context | Deep: Bundled with verse fetch, cached in DB | `src/lib/qf/content.ts` |
 | **Audio API** (recitation 1) | Quran Moment — Verse recitation playback | Moderate: Audio URL resolved per verse | `src/lib/qf/content.ts` |
 | **Quran MCP** (semantic vector search) | Quran Echoes — Thematic verse discovery | Deep: Full MCP protocol via SDK, 4 tools used, grounding nonce | `src/lib/qf/mcp.ts` |
@@ -279,7 +277,7 @@ with original verse + all echo verses
 | QF User API | Feature Mapped | Integration Depth | File Path |
 |-------------|---------------|-------------------|-----------|
 | **Bookmarks API** | Save favorite verses, sync to Quran.com | Deep: Bidirectional sync, OIDC + client_credentials hybrid | `src/lib/qf/user.ts`, `src/lib/services/bookmarks.ts` |
-| **Collections API** | "Save as Collection" for Quran Echoes, custom verse groupings | Deep: Create, add items, remove items, idempotent upsert | `src/lib/services/collections.ts`, `src/lib/services/echoes.ts` |
+| **Collections API** | Custom verse groupings, organize saved verses | Deep: Create, add items, remove items, idempotent upsert | `src/lib/services/collections.ts` |
 | **OIDC / OAuth2** | Connect Quran.com account, enable bookmark sync | Deep: Full PKCE (S256) flow, token refresh, cookie sessions | `src/lib/qf/oidc.ts`, `src/app/api/auth/qf/` |
 
 ### Authentication Architecture
@@ -417,7 +415,7 @@ CompassQ is the only submission that measures **depth of engagement** (resonance
 | **Fire-and-forget QF sync** | Bookmark sync to Quran.com never blocks the user experience |
 | **Multi-layer verse caching** | MCP result → DB cache → Content API. Minimizes external calls, maximizes speed |
 | **Zod on API boundaries** | Runtime type safety catches malformed requests before they hit business logic |
-| **Retry with exponential backoff + jitter** | Graceful handling of QF API rate limits (429) and transient failures |
+| **Retry with backoff + jitter** | Graceful handling of QF API rate limits (429) and transient failures |
 | **localStorage draft persistence** | Reflections survive network issues and page refreshes |
 | **Timezone-aware daily limits** | One check-in per *user's local day*, not UTC day |
 
@@ -449,7 +447,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 QF_CONTENT_ENV=production
 QF_CONTENT_CLIENT_ID=your_client_id
 QF_CONTENT_CLIENT_SECRET=your_client_secret
-QF_CONTENT_TRANSLATION_RESOURCE_ID=131
+QF_CONTENT_TRANSLATION_RESOURCE_ID=85
 QF_CONTENT_TAFSIR_RESOURCE_ID=169
 QF_CONTENT_RECITATION_ID=1
 
@@ -469,7 +467,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001).
 
 ### Database Migrations
 
