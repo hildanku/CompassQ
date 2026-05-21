@@ -75,12 +75,7 @@ export async function GET(request: Request) {
         return NextResponse.redirect(
             new URL(`${next}?qf=connected`, requestUrl.origin),
         )
-    } catch (err) {
-        console.error(
-            '[qf-oidc] Token exchange failed:',
-            err instanceof Error ? err.message : err,
-        )
-
+    } catch {
         clearOidcStateCookies(cookieStore)
 
         return NextResponse.redirect(

@@ -231,15 +231,8 @@ export async function findEchoes(
             query,
             limit: ECHO_LIMIT + 2, // fetch extra in case we need to filter
         })
-        console.log('[echoes] MCP search query:', query)
-        console.log('[echoes] MCP search returned:', searchResults.length, 'results')
-        if (searchResults.length > 0) {
-            console.log('[echoes] First result keys:', Object.keys(searchResults[0]))
-            console.log('[echoes] First result:', JSON.stringify(searchResults[0]).slice(0, 500))
-        }
-    } catch (err) {
+    } catch {
         // MCP unavailable - return empty (non-blocking)
-        console.error('[echoes] MCP search failed:', err)
         return []
     }
 
@@ -249,15 +242,12 @@ export async function findEchoes(
 
     for (const result of searchResults) {
         const verseKey = extractVerseKey(result)
-        console.log('[echoes] extractVerseKey result:', verseKey, 'from:', JSON.stringify(result).slice(0, 200))
 
         if (!verseKey || seenKeys.has(verseKey)) continue
 
         seenKeys.add(verseKey)
         filteredResults.push({ key: verseKey, result })
     }
-
-    console.log('[echoes] Filtered results count:', filteredResults.length)
 
     if (filteredResults.length === 0) {
         return []

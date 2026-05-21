@@ -26,11 +26,6 @@ type CandidateRow = {
     priority: number
 }
 
-type ResonanceWeight = {
-    category: string
-    avg_resonance: number
-}
-
 async function loadCategoryResonanceWeights(
     supabase: SupabaseClient,
     userId: string,

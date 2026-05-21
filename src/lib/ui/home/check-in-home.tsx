@@ -179,7 +179,6 @@ type CheckInHomeActiveMomentProps = {
     resonanceScore: number | null
     isSavingReflection: boolean
     hasCheckedInToday: boolean
-    isCheckInDrawerOpen: boolean
     setIsCheckInDrawerOpen: (open: boolean) => void
     handleReflectionDraftChange: (value: string) => void
     handleSubmitReflection: () => void
@@ -200,7 +199,6 @@ function CheckInHomeActiveMoment({
     resonanceScore,
     isSavingReflection,
     hasCheckedInToday,
-    isCheckInDrawerOpen,
     setIsCheckInDrawerOpen,
     handleReflectionDraftChange,
     handleSubmitReflection,
@@ -401,7 +399,6 @@ export function CheckInHome({ displayName }: CheckInHomeProps) {
                 resonanceScore={resonanceScore}
                 isSavingReflection={isSavingReflection}
                 hasCheckedInToday={hasCheckedInToday}
-                isCheckInDrawerOpen={isCheckInDrawerOpen}
                 setIsCheckInDrawerOpen={setIsCheckInDrawerOpen}
                 handleReflectionDraftChange={handleReflectionDraftChange}
                 handleSubmitReflection={handleSubmitReflection}

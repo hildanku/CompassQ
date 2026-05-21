@@ -164,31 +164,11 @@ export async function syncBookmarkToQf(ayahKey: string): Promise<void> {
             return
         }
 
-        if (response.ok) {
-            const data = (await response.json()) as { success?: boolean }
-            console.info(
-                `[qf-user] Bookmark synced to QF (${source}):`,
-                ayahKey,
-                '→',
-                data.success ?? 'ok',
-            )
-        } else if (source === 'client_credentials' && response.status === 500) {
-            console.info(
-                `[qf-user] Bookmark sync attempted (${source}):`,
-                ayahKey,
-                '— QF returned 500 (no user context, awaiting OIDC approval)',
-            )
-        } else {
-            console.warn(
-                `[qf-user] Bookmark sync returned ${response.status} (${source}) for`,
-                ayahKey,
-            )
+        if (!response.ok && !(source === 'client_credentials' && response.status === 500)) {
+            // non-retriable error — silently ignored
         }
-    } catch (error) {
-        console.error(
-            '[qf-user] Failed to sync bookmark creation to QF:',
-            error instanceof Error ? error.message : error,
-        )
+    } catch {
+        // sync failure — silently ignored (fire-and-forget)
     }
 }
 
@@ -215,30 +195,10 @@ export async function syncBookmarkRemovalToQf(ayahKey: string): Promise<void> {
             return
         }
 
-        if (response.ok) {
-            const data = (await response.json()) as { success?: boolean }
-            console.info(
-                `[qf-user] Bookmark removal synced to QF (${source}):`,
-                ayahKey,
-                '→',
-                data.success ?? 'ok',
-            )
-        } else if (source === 'client_credentials' && response.status === 500) {
-            console.info(
-                `[qf-user] Bookmark removal attempted (${source}):`,
-                ayahKey,
-                '— QF returned 500 (no user context, awaiting OIDC approval)',
-            )
-        } else {
-            console.warn(
-                `[qf-user] Bookmark removal returned ${response.status} (${source}) for`,
-                ayahKey,
-            )
+        if (!response.ok && !(source === 'client_credentials' && response.status === 500)) {
+            // non-retriable error — silently ignored
         }
-    } catch (error) {
-        console.error(
-            '[qf-user] Failed to sync bookmark removal to QF:',
-            error instanceof Error ? error.message : error,
-        )
+    } catch {
+        // sync failure — silently ignored (fire-and-forget)
     }
 }

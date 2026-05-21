@@ -112,9 +112,6 @@ export async function searchQuran(opts: {
 
     const data = extractStructured(res)
 
-    console.log('[mcp] search_quran raw response type:', typeof data, Array.isArray(data) ? 'array' : '')
-    console.log('[mcp] search_quran raw response:', JSON.stringify(data).slice(0, 1000))
-
     // normalize response
     if (Array.isArray(data)) {
         return data as SearchQuranResult[]
