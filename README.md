@@ -528,6 +528,8 @@ src/
 
 ## 👥 Team
 
+**Team: Miaww Miaww Startup, Aamiin**
+
 | Name | Role |
 |------|------|
 | **Hildan Kusto Utomo** | Full-Stack Engineer |

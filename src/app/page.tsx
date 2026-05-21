@@ -263,6 +263,9 @@ export default async function Home() {
                             CompassQ
                         </div>
                         <p className="text-xs text-emerald-100/30">
+                            Team Miaww Miaww Startup, Aamiin
+                        </p>
+                        <p className="text-xs text-emerald-100/30">
                             Built with the Quran Foundation API
                         </p>
                     </div>
