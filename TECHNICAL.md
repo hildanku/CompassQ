@@ -4,38 +4,38 @@
 
 ```mermaid
 flowchart TD
-    U[User]
+    U["User"]
 
-    subgraph C[Client - Next.js 16 / React 19]
-        UI[App Router Pages + UI Components]
-        HF[useCheckInFlow hook\nlocal reflection draft persistence]
-        RQ[React Query mutations / queries]
+    subgraph C["Client - Next.js 16 / React 19"]
+        UI["App Router Pages + UI Components"]
+        HF["useCheckInFlow hook<br/>local reflection draft persistence"]
+        RQ["React Query mutations / queries"]
     end
 
-    subgraph S[Next.js Server Layer]
-        API[Route Handlers /api/v1/*]
-        AUTH[QF OIDC Routes\n/api/auth/qf/start\n/api/auth/qf/callback\n/api/auth/qf/session]
-        SVCS[Service Layer\nmoments.ts\nsessions.ts\nechoes.ts\ninsights.ts]
-        MCP[@modelcontextprotocol/sdk client\nlib/qf/mcp.ts]
-        QFC[QF Content API client\nlib/qf/content.ts]
+    subgraph S["Next.js Server Layer"]
+        API["Route Handlers /api/v1/*"]
+        AUTH["QF OIDC Routes<br/>/api/auth/qf/start<br/>/api/auth/qf/callback<br/>/api/auth/qf/session"]
+        SVCS["Service Layer<br/>moments.ts<br/>sessions.ts<br/>echoes.ts<br/>insights.ts"]
+        MCP["@modelcontextprotocol/sdk client<br/>lib/qf/mcp.ts"]
+        QFC["QF Content API client<br/>lib/qf/content.ts"]
     end
 
-    subgraph SB[Supabase]
-        SBA[Supabase Auth]
-        DB[(Postgres + RLS)]
-        P[profiles]
-        CI[check_ins]
-        SS[sessions]
-        RF[reflections]
-        QR[quran_references]
-        RC[recommendation_catalog]
-        COL[collections + collection_items]
-        WR[weekly_recaps + streaks]
+    subgraph SB["Supabase"]
+        SBA["Supabase Auth"]
+        DB[("Postgres + RLS")]
+        P["profiles"]
+        CI["check_ins"]
+        SS["sessions"]
+        RF["reflections"]
+        QR["quran_references"]
+        RC["recommendation_catalog"]
+        COL["collections + collection_items"]
+        WR["weekly_recaps + streaks"]
     end
 
-    subgraph QF[Quran Foundation Platforms]
-        REST[Quran Foundation REST APIs\nOAuth2 + Content API]
-        MCPS[Quran MCP Server\nsearch_quran / fetch_quran / fetch_translation]
+    subgraph QF["Quran Foundation Platforms"]
+        REST["Quran Foundation REST APIs<br/>OAuth2 + Content API"]
+        MCPS["Quran MCP Server<br/>search_quran / fetch_quran / fetch_translation"]
     end
 
     U --> UI
