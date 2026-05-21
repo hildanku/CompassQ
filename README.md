@@ -20,7 +20,7 @@
 
 ---
 
-**[▶️ Watch Demo (2 min)](#)** · **[🌐 Try Live App](#)** · **[📄 Hackathon Submission](#)**
+**[▶️ Watch Demo (2 min)](https://youtube.com/shorts/Ehvn7_ZdrIE)** · **[🌐 Try Live App](https://compassq.hildankutomo.my.id)** · **[📄 Hackathon Submission](#)**
 
 </div>
 
@@ -523,6 +523,15 @@ src/
 │       └── profile/              # User profile + QF connect
 └── supabase/migrations/          # Database schema & seed data
 ```
+
+---
+
+## 👥 Team
+
+| Name | Role |
+|------|------|
+| **Hildan Kusto Utomo** | Full-Stack Engineer |
+| **Terresa Alicia** | Project Manager & Product Engineer |
 
 ---
 
